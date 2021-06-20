@@ -200,13 +200,13 @@ export default function VideoLoopTool() {
                         If you change it to this
                     </p>
                     <p>
-                        <strong>https://joemoceri.github.io/react-app?v=videoId</strong>
+                        <strong>https://joemoceri.github.io/video-loop-tool?v=videoId</strong>
                     </p>
                     <p>
                         By replacing
                     </p>
                     <p>
-                        <strong>https://www.youtube.com/watch</strong> with <strong>https://joemoceri.github.io/react-app</strong>
+                        <strong>https://www.youtube.com/watch</strong> with <strong>https://joemoceri.github.io/video-loop-tool</strong>
                     </p>
                     <p>you can add additional looping capabilities to any youtube video.</p>
                     <h3>Method 2</h3>
