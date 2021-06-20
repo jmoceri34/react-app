@@ -4,16 +4,18 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 require('jquery-ui/ui/widgets/slider');
 
-export default function About(obj) {
+export default function VideoLoopTool() {
 
-    var videoId = obj.videoId;
     var player = undefined;
     var leftHandle = undefined;
     var rightHandle = undefined;
     var leftValue = undefined;
     var rightValue = undefined;
-    var playerLoaded = false;
     var loopTimeout;
+
+    var urlParameters = new URLSearchParams(window.location.search);
+
+    var videoId = urlParameters.get("v");
 
     // keep track when the user enters a new video id
     function handleChange(e) {
@@ -65,41 +67,42 @@ export default function About(obj) {
                 range: true,
                 min: min,
                 max: max,
-                values: [!playerLoaded ? 22 : min, max],
+                values: [min, max],
                 slide: function (event, ui) {
 
                     leftValue = ui.values[0];
                     rightValue = ui.values[1];
 
                     if (leftHandle) {
-                        leftHandle[0].innerHTML = wrap(leftValue, true);
+                        leftHandle[0].innerHTML = wrap(leftValue, true, true);
                     }
 
                     if (rightHandle) {
                         rightHandle[0].innerHTML = wrap(rightValue, true);
                     }
 
-                    player.pauseVideo();
-
-                    player.seekTo(leftValue, true);
+                    if (player.getCurrentTime() < leftValue || player.getCurrentTime() > rightValue) {
+                        player.seekTo(leftValue, true);
+                    }
                 }
             });
 
             $(slider[0].children[1]).empty();
             $(slider[0].children[2]).empty();
 
-            leftHandle = $(slider[0].children[1]).prepend(wrap(!playerLoaded ? 22 : min, true));
+            leftHandle = $(slider[0].children[1]).prepend(wrap(min, true, true));
             rightHandle = $(slider[0].children[2]).prepend(wrap(max, true));
 
-            leftValue = !playerLoaded ? 22 : min;
+            leftValue = min;
             rightValue = max;
 
-            function wrap(value, format) {
+            function wrap(value, format, left) {
                 format = format == undefined ? false : true;
                 if (format) {
                     value = new Date(value * 1000).toISOString().substr(11, 8);
                 }
-                return '<span style="position: absolute !important; bottom: -50px; color: #000 !important;">' + value + '</span>';
+                var px = left ? "-35px" : "35px";
+                return '<span style="position: absolute !important; bottom: -50px; left: ' + px + '; color: #000 !important;">' + value + '</span>';
             }
         }
 
@@ -130,61 +133,87 @@ export default function About(obj) {
                 createSlider(left, right);
 
                 player.seekTo(leftValue, true);
-
-                playerLoaded = true;
             }
 
-            var running = false;
-
             function onPlayerStateChange(event) {
-                if (event.data == window.YT.PlayerState.PLAYING && !running) {
+                if (event.data == window.YT.PlayerState.PLAYING) {
 
-                    running = true;
+                    if (player && player.getCurrentTime() < leftValue) {
+                        player.seekTo(leftValue, true);
+                    }
 
-                    player.seekTo(leftValue, true);
+                    var loopTimeout = setInterval(function () {
+                        var currentTime = player.getCurrentTime();
 
-                    player.playVideo();
-
+                        if (currentTime >= rightValue) {
+                            player.seekTo(leftValue, true);
+                        }
+                    }, 1000);
+                }
+                else if (event.data == window.YT.PlayerState.PAUSED) {
+                    if (loopTimeout) {
+                        clearTimeout(loopTimeout);
+                    }
+                }
+                else if (event.data == window.YT.PlayerState.ENDED) {
                     if (loopTimeout) {
                         clearTimeout(loopTimeout);
                     }
 
-                    var time = (rightValue - leftValue) * 1000;
-
-                    loopTimeout = setTimeout(function () {
-                        running = false;
-                        player.stopVideo();
-                        player.seekTo(leftValue, true);
-                        player.playVideo();
-
-                    }, time);
-
+                    player.seekTo(leftValue, true);
                 }
             }
         }
     }
 
-    startLoop();
+    if (videoId) {
+        startLoop();
+    }
 
     return (
-        <div style={{ 'text-align': "center" }}>
+        <div style={{ 'textAlign': "left", 'width': '640px', 'margin': '0 auto' }}>
             <h1>Video Loop Tool</h1>
             <div style={{ display: 'block' }}>
                 <div id="player"></div>
             </div>
             <div style={{ display: 'block' }}>
-                <p>
-                    Run setup first when changing the video id, then hit play. You can change the range on the slider below to loop a specific part of the video. Then hit play on the youtube video.
-                </p>
-                <Button variant="contained" color="primary" onClick={() => { startLoop() }}>
-                    Setup
-                </Button>
-            </div>
-            <div style={{ display: 'block' }}>
-                <TextField id="standard-basic" label="YouTube VideoID" defaultValue={videoId} style={{ width: "600px" }} onChange={handleChange.bind(this)} />
+
             </div>
             <div style={{ display: 'block' }}>
                 <div id="slider-range" style={{ width: "640px", margin: '12px auto' }}></div>
+            </div>
+            <div style={{ display: 'block', 'textAlign': 'left', 'paddingTop': '25px' }}>
+                <div>
+                    <h2>Instructions</h2>
+                    <TextField id="standard-basic" label="YouTube VideoID" defaultValue={videoId} style={{ width: "600px" }} onChange={handleChange.bind(this)} />
+                    <Button variant="contained" color="primary" onClick={() => { startLoop() }} style={{ 'marginTop': "12px"}}>
+                        Setup
+                    </Button>
+                    <h3>Method 1</h3>
+                    <p>
+                        Say you have a youtube url like this (where videoId is the youtube video id)
+                    </p>
+                    <p>
+                        <strong>https://www.youtube.com/watch?v=videoId</strong>
+                    </p>
+                    <p>
+                        If you change it to this
+                    </p>
+                    <p>
+                        <strong>https://joemoceri.github.io/react-app?v=videoId</strong>
+                    </p>
+                    <p>
+                        By replacing
+                    </p>
+                    <p>
+                        <strong>https://www.youtube.com/watch</strong> with <strong>https://joemoceri.github.io/react-app</strong>
+                    </p>
+                    <p>you can add additional looping capabilities to any youtube video.</p>
+                    <h3>Method 2</h3>
+                    <p>
+                        You can also grab the video id and put it into the field above. Run setup first when changing the video id, then hit play on the youtube video. You can change the range on the slider below to loop a specific part of the video. Then hit play.
+                    </p>
+                </div>
             </div>
         </div>
     );
