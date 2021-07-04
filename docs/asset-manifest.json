@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/video-loop-tool/static/css/main.7813f197.chunk.css",
-    "main.js": "/video-loop-tool/static/js/main.0df27c38.chunk.js",
-    "main.js.map": "/video-loop-tool/static/js/main.0df27c38.chunk.js.map",
+    "main.js": "/video-loop-tool/static/js/main.d64e4141.chunk.js",
+    "main.js.map": "/video-loop-tool/static/js/main.d64e4141.chunk.js.map",
     "runtime-main.js": "/video-loop-tool/static/js/runtime-main.752dcb8e.js",
     "runtime-main.js.map": "/video-loop-tool/static/js/runtime-main.752dcb8e.js.map",
     "static/js/2.eddf6e34.chunk.js": "/video-loop-tool/static/js/2.eddf6e34.chunk.js",
@@ -17,6 +17,6 @@
     "static/js/runtime-main.752dcb8e.js",
     "static/js/2.eddf6e34.chunk.js",
     "static/css/main.7813f197.chunk.css",
-    "static/js/main.0df27c38.chunk.js"
+    "static/js/main.d64e4141.chunk.js"
   ]
 }
