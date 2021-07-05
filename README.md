@@ -1,3 +1,7 @@
 # Video Loop Tool
 
-Check it out [here](https://joemoceri.github.io/video-loop-tool/)
+Use this tool to loop any youtube video using a slider.
+
+**Quick Links**
+
+video-loop-tool: [https://joemoceri.github.io/video-loop-tool](https://joemoceri.github.io/video-loop-tool)
