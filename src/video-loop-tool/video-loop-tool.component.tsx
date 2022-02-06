@@ -1,257 +1,269 @@
-////import $ from 'jquery';
-////import TextField from '@material-ui/core/TextField';
-////import Button from '@material-ui/core/Button';
+import $ from 'jquery';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import { Component } from 'react';
 require('jquery-ui/ui/widgets/slider');
 
-export default function VideoLoopTool() {
+export interface VideoLoopToolProps {
 
-    //var player = undefined;
-    //var leftHandle = undefined;
-    //var rightHandle = undefined;
-    //var leftValue = undefined;
-    //var rightValue = undefined;
-    //var loopTimeout;
+}
 
-    //var urlParameters = new URLSearchParams(window.location.search);
+export interface VideoLoopToolState {
 
-    //// get the query string parameters if any
-    //var videoId = urlParameters.get("v");
-    //var queryStartTime = urlParameters.get("s");
-    //var queryEndTime = urlParameters.get("e");
+}
 
-    //// keep track when the user enters a new video id
-    //function handleChange(e) {
-    //    videoId = e.target.value;
-    //}
+export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLoopToolState> {
 
-    //function startLoop() {
+    player: any;
+    leftHandle: any;
+    rightHandle: any;
+    leftValue: any;
+    rightValue: any;
+    loopTimeout: any;
+    videoId: any;
+    urlParameters: URLSearchParams;
+    queryStartTime: any;
+    queryEndTime: any;
 
-    //    // set the query video id
-    //    urlParameters.set("v", videoId);
+    constructor(props: VideoLoopToolProps) {
+        super(props);
 
-    //    // if the player already exists, load the video
-    //    if (player) {
-    //        player.loadVideoById(videoId);
+        // get the query string parameters if any
+        this.urlParameters = new URLSearchParams(window.location.search);
 
-    //        if (loopTimeout) {
-    //            clearTimeout(loopTimeout);
-    //        }
+        this.videoId = this.urlParameters.get("v");
+        this.queryStartTime = this.urlParameters.get("s");
+        this.queryEndTime = this.urlParameters.get("e");
+    }
 
-    //        setTimeout(function () {
-    //            var duration = player.getDuration();
+    // keep track when the user enters a new video id
+    handleChange(e: any): void {
+        this.videoId = e.target.value;
+    }
 
-    //            var left = 0;
-    //            var right = duration;
+    startLoop(): void {
 
-    //            createSlider(left, right);
+        // set the query video id
+        this.urlParameters.set("v", this.videoId);
 
-    //            player.seekTo(leftValue, true);
+        // if the player already exists, load the video
+        if (this.player) {
+            this.player.loadVideoById(this.videoId);
 
-    //        }, 500);
+            if (this.loopTimeout) {
+                clearTimeout(this.loopTimeout);
+            }
 
-    //        return;
-    //    }
+            setTimeout(() => {
+                var duration = this.player.getDuration();
 
-    //    let w = (window as any);
+                var left = 0;
+                var right = duration;
 
-    //    // if YT hasn't been downloaded yet
-    //    if (!w.YT) {
-    //        // set the call back to load the player once this global callback from youtube is executed
-    //        w.onYouTubePlayerAPIReady = function () {
-    //            loadPlayer(videoId);
-    //        };
+                this.createSlider(left, right);
 
-    //        // go and get the script in the meantime
-    //        $.getScript('https://www.youtube.com/player_api');
-    //    }
-    //    // otherwise load the player
-    //    else {
-    //        loadPlayer(videoId);
-    //    }
+                this.player.seekTo(this.leftValue, true);
 
-    //    function createSlider(min, max) {
-    //        var slider = ($("#slider-range") as any).slider({
-    //            range: true,
-    //            // this should always be 0 -> duration
-    //            min: 0,
-    //            max: player.getDuration(),
-    //            values: [min, max],
-    //            slide: function (event, ui) {
+            }, 500);
 
-    //                leftValue = ui.values[0];
-    //                rightValue = ui.values[1];
+            return;
+        }
 
-    //                if (leftHandle) {
-    //                    leftHandle[0].innerHTML = wrap(leftValue, true, true);
-    //                    // update the query string parameter
-    //                    urlParameters.set("s", leftValue);
-    //                }
+        let w = (window as any);
 
-    //                if (rightHandle) {
-    //                    rightHandle[0].innerHTML = wrap(rightValue, true, undefined);
-    //                    // update the query string parameter
-    //                    urlParameters.set("e", rightValue);
-    //                }
+        // if YT hasn't been downloaded yet
+        if (!w.YT) {
+            // set the call back to load the player once this global callback from youtube is executed
+            w.onYouTubePlayerAPIReady = () => {
+                this.loadPlayer(this.videoId);
+            };
 
-    //                if (history.pushState) {
-    //                    var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + urlParameters.toString();
-    //                    window.history.pushState({ path: newurl }, '', newurl);
-    //                }
+            // go and get the script in the meantime
+            $.getScript('https://www.youtube.com/player_api');
+        }
+        // otherwise load the player
+        else {
+            this.loadPlayer(this.videoId);
+        }
+    }
 
-    //                if (player.getCurrentTime() < leftValue || player.getCurrentTime() > rightValue) {
-    //                    player.seekTo(leftValue, true);
-    //                }
-    //            }
-    //        });
+    createSlider(min: number, max: number): void {
 
-    //        $(slider[0].children[1]).empty();
-    //        $(slider[0].children[2]).empty();
+        var slider = ($("#slider-range") as any).slider({
+            range: true,
+            // this should always be 0 -> duration
+            min: 0,
+            max: this.player.getDuration(),
+            values: [min, max],
+            slide: (event: any, ui: any) => {
 
-    //        leftHandle = $(slider[0].children[1]).prepend(wrap(min, true, true));
-    //        rightHandle = $(slider[0].children[2]).prepend(wrap(max, true, undefined));
+                this.leftValue = ui.values[0];
+                this.rightValue = ui.values[1];
 
-    //        leftValue = min;
-    //        rightValue = max;
+                if (this.leftHandle) {
+                    this.leftHandle[0].innerHTML = wrap(this.leftValue, true, true);
+                    // update the query string parameter
+                    this.urlParameters.set("s", this.leftValue);
+                }
 
-    //        // update the query string when creating the slider
-    //        urlParameters.set("s", leftValue);
-    //        urlParameters.set("e", rightValue);
+                if (this.rightHandle) {
+                    this.rightHandle[0].innerHTML = wrap(this.rightValue, true, false);
+                    // update the query string parameter
+                    this.urlParameters.set("e", this.rightValue);
+                }
 
-    //        if (history.pushState) {
-    //            var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + urlParameters.toString();
-    //            window.history.pushState({ path: newurl }, '', newurl);
-    //        }
+                var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + this.urlParameters.toString();
 
-    //        function wrap(value, format, left) {
-    //            format = format == undefined ? false : true;
-    //            if (format) {
-    //                value = new Date(value * 1000).toISOString().substr(11, 8);
-    //            }
-    //            var px = left ? "-35px" : "35px";
-    //            return '<span style="position: absolute !important; bottom: -50px; left: ' + px + '; color: #000 !important;">' + value + '</span>';
-    //        }
-    //    }
+                window.history.pushState({ path: newurl }, '', newurl);
 
-    //    function loadPlayer(videoId) {
-    //        player = new w.YT.Player('player', {
-    //            playerVars: {
-    //                modestbranding: 1,
-    //                rel: 0,
-    //                showinfo: 0,
-    //                autoplay: 0,
-    //                mute: 0
-    //            },
-    //            height: 360,
-    //            width: 640,
-    //            videoId: videoId,
-    //            events: {
-    //                'onReady': onPlayerReady,
-    //                'onStateChange': onPlayerStateChange
-    //            }
-    //        });
+                if (this.player.getCurrentTime() < this.leftValue || this.player.getCurrentTime() > this.rightValue) {
+                    this.player.seekTo(this.leftValue, true);
+                }
+            }
+        });
 
-    //        function onPlayerReady(event) {
-    //            var duration = player.getDuration();
+        $(slider[0].children[1]).empty();
+        $(slider[0].children[2]).empty();
 
-    //            var left = queryStartTime || 0;
-    //            var right = queryEndTime || duration;
+        this.leftHandle = $(slider[0].children[1]).prepend(wrap(min, true, true));
+        this.rightHandle = $(slider[0].children[2]).prepend(wrap(max, true, false));
 
-    //            createSlider(left, right);
+        this.leftValue = min;
+        this.rightValue = max;
 
-    //            player.seekTo(leftValue, true);
-    //        }
+        // update the query string when creating the slider
+        this.urlParameters.set("s", this.leftValue);
+        this.urlParameters.set("e", this.rightValue);
 
-    //        function onPlayerStateChange(event) {
-    //            if (event.data == w.YT.PlayerState.PLAYING) {
+        var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + this.urlParameters.toString();
+        window.history.pushState({ path: newurl }, '', newurl);
 
-    //                if (player && player.getCurrentTime() < leftValue) {
-    //                    player.seekTo(leftValue, true);
-    //                }
+        function wrap(value: any, format: boolean, left: boolean): string {
+            if (format) {
+                value = new Date(value * 1000).toISOString().substr(11, 8);
+            }
+            var px = left ? "-35px" : "35px";
+            return '<span style="position: absolute !important; bottom: -50px; left: ' + px + '; color: #000 !important;">' + value + '</span>';
+        }
+    }
 
-    //                var loopTimeout = setInterval(function () {
-    //                    var currentTime = player.getCurrentTime();
+    loadPlayer(videoId: any): void {
+        this.player = new (window as any).YT.Player('player', {
+            playerVars: {
+                modestbranding: 1,
+                rel: 0,
+                showinfo: 0,
+                autoplay: 0,
+                mute: 0
+            },
+            height: 360,
+            width: 640,
+            videoId: videoId,
+            events: {
+                'onReady': (e: any) => {
+                    console.log(this);
+                    var duration = this.player.getDuration();
 
-    //                    if (currentTime >= rightValue) {
-    //                        player.seekTo(leftValue, true);
-    //                    }
-    //                }, 1000);
-    //            }
-    //            else if (event.data == w.YT.PlayerState.PAUSED) {
-    //                if (loopTimeout) {
-    //                    clearTimeout(loopTimeout);
-    //                }
-    //            }
-    //            else if (event.data == w.YT.PlayerState.ENDED) {
-    //                if (loopTimeout) {
-    //                    clearTimeout(loopTimeout);
-    //                }
+                    var left = this.queryStartTime || 0;
+                    var right = this.queryEndTime || duration;
 
-    //                player.seekTo(leftValue, true);
-    //            }
-    //        }
-    //    }
-    //}
+                    this.createSlider(left, right);
 
-    //if (videoId) {
-    //    startLoop();
-    //}
+                    this.player.seekTo(this.leftValue, true);
+                },
+                'onStateChange': (event: any) => {
+                    if (event.data == (window as any).YT.PlayerState.PLAYING) {
 
-    return (
-        <h2>Video Loop Tool Page</h2>
-        //<div style={{ 'textAlign': "left", 'width': '640px', 'margin': '0 auto' }}>
-        //    <h1>Video Loop Tool</h1>
-        //    <div style={{ display: 'block' }}>
-        //        <div id="player"></div>
-        //    </div>
-        //    <div style={{ display: 'block' }}>
+                        if (this.player && this.player.getCurrentTime() < this.leftValue) {
+                            this.player.seekTo(this.leftValue, true);
+                        }
 
-        //    </div>
-        //    <div style={{ display: 'block' }}>
-        //        <div id="slider-range" style={{ width: "640px", margin: '12px auto' }}></div>
-        //    </div>
-        //    <div style={{ display: 'block', 'textAlign': 'left', 'paddingTop': '25px' }}>
-        //        <div>
-        //            <h2>Instructions</h2>
-        //            <TextField id="standard-basic" label="YouTube VideoID" defaultValue={videoId} style={{ width: "600px" }} onChange={handleChange.bind(this)} />
-        //            <Button variant="contained" color="primary" onClick={() => { startLoop() }} style={{ 'marginTop': "12px"}}>
-        //                Setup
-        //            </Button>
-        //            <h3>Overview</h3>
-        //            <p>
-        //                You can use this tool to loop parts of a youtube video. In the URL above you can specify the video (v), start time (s), and end time (e) in the query string:
-        //            </p>
-        //            <p>
-        //                https://joemoceri.github.io/video-loop-tool?<strong>v</strong>=<strong>&#123;youtubeVideoId&#125;</strong>&<strong>s</strong>=<strong>&#123;startTimeInSeconds&#125;</strong>&<strong>e</strong>=<strong>&#123;endTimeInSeconds&#125;</strong>
-        //            </p>
-        //            <p>
-        //                The URL will update as you update the video id and slider.
-        //            </p>
-        //            <h3>Method 1</h3>
-        //            <p>
-        //                Say you have a youtube url like this (where videoId is the youtube video id)
-        //            </p>
-        //            <p>
-        //                <strong>https://www.youtube.com/watch?v=videoId</strong>
-        //            </p>
-        //            <p>
-        //                If you change it to this
-        //            </p>
-        //            <p>
-        //                <strong>https://joemoceri.github.io/video-loop-tool?v=videoId</strong>
-        //            </p>
-        //            <p>
-        //                By replacing
-        //            </p>
-        //            <p>
-        //                <strong>https://www.youtube.com/watch</strong> with <strong>https://joemoceri.github.io/video-loop-tool</strong>
-        //            </p>
-        //            <p>you can add additional looping capabilities to any youtube video.</p>
-        //            <h3>Method 2</h3>
-        //            <p>
-        //                You can also grab the video id and put it into the field above. Run setup first when changing the video id, then hit play on the youtube video. You can change the range on the slider below to loop a specific part of the video. Then hit play.
-        //            </p>
-        //        </div>
-        //    </div>
-        //</div>
-    );
+                        this.loopTimeout = setInterval(() => {
+                            var currentTime = this.player.getCurrentTime();
+
+                            if (currentTime >= this.rightValue) {
+                                this.player.seekTo(this.leftValue, true);
+                            }
+                        }, 1000);
+                    }
+                    else if (event.data == (window as any).YT.PlayerState.PAUSED) {
+                        if (this.loopTimeout) {
+                            clearTimeout(this.loopTimeout);
+                        }
+                    }
+                    else if (event.data == (window as any).YT.PlayerState.ENDED) {
+                        if (this.loopTimeout) {
+                            clearTimeout(this.loopTimeout);
+                        }
+
+                        this.player.seekTo(this.leftValue, true);
+                    }
+                }
+            }
+        });
+    }
+
+    render() {
+        if (this.videoId) {
+            this.startLoop();
+        }
+
+        return (
+            <div style={{ 'textAlign': "left", 'width': '640px', 'margin': '0 auto' }}>
+                <h1>Video Loop Tool</h1>
+                <div style={{ display: 'block' }}>
+                    <div id="player"></div>
+                </div>
+                <div style={{ display: 'block' }}>
+
+                </div>
+                <div style={{ display: 'block' }}>
+                    <div id="slider-range" style={{ width: "640px", margin: '12px auto' }}></div>
+                </div>
+                <div style={{ display: 'block', 'textAlign': 'left', 'paddingTop': '25px' }}>
+                    <div>
+                        <h2>Instructions</h2>
+                        <TextField id="standard-basic" label="YouTube VideoID" defaultValue={this.videoId} style={{ width: "600px" }} onChange={this.handleChange.bind(this)} />
+                        <Button variant="contained" color="primary" onClick={() => { this.startLoop() }} style={{ 'marginTop': "12px" }}>
+                            Setup
+                        </Button>
+                        <h3>Overview</h3>
+                        <p>
+                            You can use this tool to loop parts of a youtube video. In the URL above you can specify the video (v), start time (s), and end time (e) in the query string:
+                        </p>
+                        <p>
+                            https://joemoceri.github.io/video-loop-tool?<strong>v</strong>=<strong>&#123;youtubeVideoId&#125;</strong>&<strong>s</strong>=<strong>&#123;startTimeInSeconds&#125;</strong>&<strong>e</strong>=<strong>&#123;endTimeInSeconds&#125;</strong>
+                        </p>
+                        <p>
+                            The URL will update as you update the video id and slider.
+                        </p>
+                        <h3>Method 1</h3>
+                        <p>
+                            Say you have a youtube url like this (where videoId is the youtube video id)
+                        </p>
+                        <p>
+                            <strong>https://www.youtube.com/watch?v=videoId</strong>
+                        </p>
+                        <p>
+                            If you change it to this
+                        </p>
+                        <p>
+                            <strong>https://joemoceri.github.io/video-loop-tool?v=videoId</strong>
+                        </p>
+                        <p>
+                            By replacing
+                        </p>
+                        <p>
+                            <strong>https://www.youtube.com/watch</strong> with <strong>https://joemoceri.github.io/video-loop-tool</strong>
+                        </p>
+                        <p>you can add additional looping capabilities to any youtube video.</p>
+                        <h3>Method 2</h3>
+                        <p>
+                            You can also grab the video id and put it into the field above. Run setup first when changing the video id, then hit play on the youtube video. You can change the range on the slider below to loop a specific part of the video. Then hit play.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 };

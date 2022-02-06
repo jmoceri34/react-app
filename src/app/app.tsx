@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 
 const VideoLoopTool = lazy(() => import('video-loop-tool/video-loop-tool.component'));
-const Playlist = lazy(() => import('playlist/playlist.component'));
+const Playlists = lazy(() => import('playlists/playlists.component'));
 
 function App() {
     return (
@@ -21,13 +21,13 @@ function App() {
                             <Link to="/video-loop-tool">Video Loop Tool</Link>
                         </li>
                         <li>
-                            <Link to="/playlist">Playlists</Link>
+                            <Link to="/playlists">Playlists</Link>
                         </li>
                     </ul>
 
                     {/* Routes */}
                     <Routes>
-                        <Route path="/playlist" element={<Playlist />}>
+                        <Route path="/playlists" element={<Playlists />}>
                         </Route>
                         <Route path="/video-loop-tool" element={<VideoLoopTool />}>
                         </Route>
