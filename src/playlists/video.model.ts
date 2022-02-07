@@ -4,4 +4,5 @@ export interface Video {
     VideoId: string;
     StartTime: number;
     EndTime: number;
+    [key: string]: any;
 }

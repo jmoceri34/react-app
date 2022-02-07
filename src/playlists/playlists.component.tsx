@@ -15,18 +15,14 @@ export interface PlaylistState {
 
 export default class Playlists extends Component<PlaylistProps, PlaylistState> {
 
-    state: PlaylistState = {
-        playlists: [],
-        selectedPlaylist: undefined
-    };
+    state: PlaylistState;
 
     constructor(props: PlaylistProps) {
         super(props);
-
-        this.setState({
+        this.state = {
             playlists: [],
             selectedPlaylist: undefined
-        });
+        };
     }
 
     // https://www.tutorialspoint.com/how-to-create-guid-uuid-in-javascript
@@ -45,28 +41,27 @@ export default class Playlists extends Component<PlaylistProps, PlaylistState> {
             Videos: []
         };
 
-        let playlists = this.state.playlists;
+        let newPlaylists = [...this.state.playlists];
 
-        playlists.push(playlist);
+        newPlaylists.push(playlist);
 
         this.setState({
-            ...this.state,
-            playlists: playlists
+            playlists: newPlaylists
         });
     }
 
     removePlaylist(playlistId: string): void {
-        let playlists = this.state.playlists;
-        playlists = playlists.filter(p => p.Id !== playlistId);
+        let newPlaylists = [...this.state.playlists];
+        newPlaylists = newPlaylists.filter(p => p.Id !== playlistId);
 
         this.setState({
-            ...this.state,
-            playlists: playlists
+            playlists: newPlaylists
         });
     }
 
     addVideo(playlistId: string): void {
-        let selectedPlaylist = this.state.playlists.filter((p) => p.Id === playlistId)[0];
+        const newPlaylists = [...this.state.playlists];
+        let selectedPlaylist = newPlaylists.filter((p) => p.Id === playlistId)[0];
 
         selectedPlaylist.Videos.push({
             Id: this.createUUID(),
@@ -77,17 +72,39 @@ export default class Playlists extends Component<PlaylistProps, PlaylistState> {
         });
 
         this.setState({
-            ...this.state
+            playlists: newPlaylists
         });
     }
 
     removeVideo(playlistId: string, videoVideoId: string): void {
-        let selectedPlaylist = this.state.playlists.filter((p) => p.Id === playlistId)[0];
+        const newPlaylists = [...this.state.playlists];
+
+        let selectedPlaylist = newPlaylists.filter((p) => p.Id === playlistId)[0];
 
         selectedPlaylist.Videos = selectedPlaylist.Videos.filter(v => v.Id !== videoVideoId);
 
         this.setState({
-            ...this.state
+            playlists: newPlaylists
+        });
+    }
+
+    handlePlaylistChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number, propertyName: string): void {
+        const newPlaylists = [...this.state.playlists];
+
+        newPlaylists[index][propertyName] = e.target.value;
+
+        this.setState({
+            playlists: newPlaylists
+        });
+    }
+
+    handleVideoChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, playlistIndex: number, videoIndex: number, propertyName: string): void {
+        const newPlaylists = [...this.state.playlists];
+
+        newPlaylists[playlistIndex].Videos[videoIndex][propertyName] = e.target.value;
+
+        this.setState({
+            playlists: newPlaylists
         });
     }
 
@@ -100,25 +117,25 @@ export default class Playlists extends Component<PlaylistProps, PlaylistState> {
                 </Button>
                 {/* Template for each playlist */}
                 {
-                    (this.state.playlists).map((playlist) => {
+                    (this.state.playlists).map((playlist, playlistIndex) => {
                         return (
                             <div style={{ border: "1px solid black", padding: "12px", margin: "12px" }} key={playlist.Id}>
-                                <TextField id="standard-basic" label="Playlist Id" style={{ "width": "600px", "marginRight": "12px" }} />
-                                <TextField id="standard-basic" label="Playlist Name" style={{ width: "600px", "marginRight": "12px" }} />
+                                <TextField id="standard-basic" label="Playlist Id" value={playlist.Id} style={{ "width": "600px", "marginRight": "12px" }} />
+                                <TextField id="standard-basic" label="Playlist Name" defaultValue={playlist.Name} onChange={e => this.handlePlaylistChange(e, playlistIndex, "Name")} style={{ width: "600px", "marginRight": "12px" }} />
                                 <br />
                                 <br />
                                 <Button variant="contained" color="primary" onClick={() => { this.addVideo(playlist.Id) }} style={{ 'marginTop': "12px", display: "block" }}>
                                     Add Video
                                 </Button>
                                 {
-                                    playlist.Videos.map((video) => {
+                                    playlist.Videos.map((video, videoIndex) => {
                                         return (
-                                            <div style={{ border: "1px solid black", margin: "12px" }} key={video.Id}>
-                                                <TextField id="standard-basic" label="Video Id" style={{ "width": "600px", "marginRight": "12px" }} />
-                                                <TextField id="standard-basic" label="Video Name" style={{ "width": "600px", "marginRight": "12px" }} />
-                                                <TextField id="standard-basic" label="Video VideoId" style={{ "width": "600px", "marginRight": "12px" }} />
-                                                <TextField id="standard-basic" label="Video StartTime" style={{ "width": "600px", "marginRight": "12px" }} />
-                                                <TextField id="standard-basic" label="Video EndTime" style={{ "width": "600px", "marginRight": "12px" }} />
+                                            <div style={{ border: "1px solid black", margin: "12px", padding: "12px" }} key={video.Id}>
+                                                <TextField id="standard-basic" label="Video Id" value={video.Id} style={{ "width": "600px", "marginRight": "12px" }} />
+                                                <TextField id="standard-basic" label="Video Name" defaultValue={video.Name} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "Name")} style={{ "width": "600px", "marginRight": "12px" }} />
+                                                <TextField id="standard-basic" label="Video VideoId" defaultValue={video.VideoId} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "VideoId")} style={{ "width": "600px", "marginRight": "12px" }} />
+                                                <TextField id="standard-basic" label="Video StartTime" defaultValue={video.StartTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "StartTime")} style={{ "width": "600px", "marginRight": "12px" }} />
+                                                <TextField id="standard-basic" label="Video EndTime" defaultValue={video.EndTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "EndTime")} style={{ "width": "600px", "marginRight": "12px" }} />
                                                 <br />
                                                 <br />
                                                 <Button variant="contained" color="secondary" onClick={() => { this.removeVideo(playlist.Id, video.Id) }} style={{ 'marginTop': "12px", display: "block" }}>

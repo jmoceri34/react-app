@@ -9,10 +9,12 @@ export interface VideoLoopToolProps {
 }
 
 export interface VideoLoopToolState {
-
+    videoId: string;
 }
 
 export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLoopToolState> {
+
+    state: VideoLoopToolState;
 
     player: any;
     leftHandle: any;
@@ -20,7 +22,6 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
     leftValue: any;
     rightValue: any;
     loopTimeout: any;
-    videoId: any;
     urlParameters: URLSearchParams;
     queryStartTime: any;
     queryEndTime: any;
@@ -31,24 +32,33 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         // get the query string parameters if any
         this.urlParameters = new URLSearchParams(window.location.search);
 
-        this.videoId = this.urlParameters.get("v");
+        this.state = {
+            videoId: this.urlParameters.get("v")!
+        }
+
         this.queryStartTime = this.urlParameters.get("s");
         this.queryEndTime = this.urlParameters.get("e");
+
+        if (this.state && this.state.videoId) {
+            this.startLoop();
+        }
     }
 
     // keep track when the user enters a new video id
-    handleChange(e: any): void {
-        this.videoId = e.target.value;
+    handleChange(e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void {
+        this.setState({
+            videoId: e.target.value
+        });
     }
 
     startLoop(): void {
 
         // set the query video id
-        this.urlParameters.set("v", this.videoId);
+        this.urlParameters.set("v", this.state.videoId);
 
         // if the player already exists, load the video
         if (this.player) {
-            this.player.loadVideoById(this.videoId);
+            this.player.loadVideoById(this.state.videoId);
 
             if (this.loopTimeout) {
                 clearTimeout(this.loopTimeout);
@@ -75,7 +85,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         if (!w.YT) {
             // set the call back to load the player once this global callback from youtube is executed
             w.onYouTubePlayerAPIReady = () => {
-                this.loadPlayer(this.videoId);
+                this.loadPlayer(this.state.videoId);
             };
 
             // go and get the script in the meantime
@@ -83,7 +93,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         }
         // otherwise load the player
         else {
-            this.loadPlayer(this.videoId);
+            this.loadPlayer(this.state.videoId);
         }
     }
 
@@ -204,10 +214,6 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
     }
 
     render() {
-        if (this.videoId) {
-            this.startLoop();
-        }
-
         return (
             <div style={{ 'textAlign': "left", 'width': '640px', 'margin': '0 auto' }}>
                 <h1>Video Loop Tool</h1>
@@ -223,7 +229,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                 <div style={{ display: 'block', 'textAlign': 'left', 'paddingTop': '25px' }}>
                     <div>
                         <h2>Instructions</h2>
-                        <TextField id="standard-basic" label="YouTube VideoID" defaultValue={this.videoId} style={{ width: "600px" }} onChange={this.handleChange.bind(this)} />
+                        <TextField id="standard-basic" label="YouTube VideoID" defaultValue={this.state ? this.state.videoId : null} style={{ width: "600px" }} onChange={e => this.handleChange(e)} />
                         <Button variant="contained" color="primary" onClick={() => { this.startLoop() }} style={{ 'marginTop': "12px" }}>
                             Setup
                         </Button>
