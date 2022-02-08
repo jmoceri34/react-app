@@ -3,6 +3,7 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import { Component } from 'react';
 import { Playlist } from '../playlists/playlist.model';
+import { Video } from '../playlists/video.model';
 require('jquery-ui/ui/widgets/slider');
 
 export interface VideoLoopToolProps {
@@ -73,8 +74,8 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
             setTimeout(() => {
                 var duration = this.player.getDuration();
 
-                var left = 0;
-                var right = duration;
+                var left = this.queryStartTime || 0;
+                var right = this.queryEndTime || duration;
 
                 this.createSlider(left, right);
 
@@ -112,37 +113,15 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
             max: this.player.getDuration(),
             values: [min, max],
             slide: (event: any, ui: any) => {
-
-                this.leftValue = ui.values[0];
-                this.rightValue = ui.values[1];
-
-                if (this.leftHandle) {
-                    this.leftHandle[0].innerHTML = wrap(this.leftValue, true, true);
-                    // update the query string parameter
-                    this.urlParameters.set("s", this.leftValue);
-                }
-
-                if (this.rightHandle) {
-                    this.rightHandle[0].innerHTML = wrap(this.rightValue, true, false);
-                    // update the query string parameter
-                    this.urlParameters.set("e", this.rightValue);
-                }
-
-                var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + this.urlParameters.toString();
-
-                window.history.pushState({ path: newurl }, '', newurl);
-
-                if (this.player.getCurrentTime() < this.leftValue || this.player.getCurrentTime() > this.rightValue) {
-                    this.player.seekTo(this.leftValue, true);
-                }
+                this.sliderMoved(ui.values[0], ui.values[1]);
             }
         });
 
         $(slider[0].children[1]).empty();
         $(slider[0].children[2]).empty();
 
-        this.leftHandle = $(slider[0].children[1]).prepend(wrap(min, true, true));
-        this.rightHandle = $(slider[0].children[2]).prepend(wrap(max, true, false));
+        this.leftHandle = $(slider[0].children[1]).prepend(this.wrap(min, true, true));
+        this.rightHandle = $(slider[0].children[2]).prepend(this.wrap(max, true, false));
 
         this.leftValue = min;
         this.rightValue = max;
@@ -153,14 +132,40 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
         var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + this.urlParameters.toString();
         window.history.pushState({ path: newurl }, '', newurl);
+    }
 
-        function wrap(value: any, format: boolean, left: boolean): string {
-            if (format) {
-                value = new Date(value * 1000).toISOString().substr(11, 8);
-            }
-            var px = left ? "-35px" : "35px";
-            return '<span style="position: absolute !important; bottom: -50px; left: ' + px + '; color: #000 !important;">' + value + '</span>';
+    sliderMoved(startTime: any, endTime: any): void {
+
+        this.leftValue = startTime;
+        this.rightValue = endTime;
+
+        if (this.leftHandle) {
+            this.leftHandle[0].innerHTML = this.wrap(this.leftValue, true, true);
+            // update the query string parameter
+            this.urlParameters.set("s", this.leftValue);
         }
+
+        if (this.rightHandle) {
+            this.rightHandle[0].innerHTML = this.wrap(this.rightValue, true, false);
+            // update the query string parameter
+            this.urlParameters.set("e", this.rightValue);
+        }
+
+        var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + this.urlParameters.toString();
+
+        window.history.pushState({ path: newurl }, '', newurl);
+
+        if (this.player.getCurrentTime() < this.leftValue || this.player.getCurrentTime() > this.rightValue) {
+            this.player.seekTo(this.leftValue, true);
+        }
+    }
+
+    wrap(value: any, format: boolean, left: boolean): string {
+        if (format) {
+            value = new Date(value * 1000).toISOString().substr(11, 8);
+        }
+        var px = left ? "-35px" : "35px";
+        return '<span style="position: absolute !important; bottom: -50px; left: ' + px + '; color: #000 !important;">' + value + '</span>';
     }
 
     loadPlayer(videoId: any): void {
@@ -177,7 +182,6 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
             videoId: videoId,
             events: {
                 'onReady': (e: any) => {
-                    console.log(this);
                     var duration = this.player.getDuration();
 
                     var left = this.queryStartTime || 0;
@@ -219,6 +223,18 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         });
     }
 
+    selectVideo(video: Video): void {
+        this.queryStartTime = video.StartTime;
+        this.queryEndTime = video.EndTime;
+
+
+        this.setState({
+            videoId: video.VideoId
+        }, () => {
+            this.startLoop();
+        });
+    }
+
     render() {
         return (
             <div style={{ 'textAlign': "left", 'width': '640px', 'margin': '0 auto' }}>
@@ -235,10 +251,35 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                 <div style={{ display: 'block', 'textAlign': 'left', 'paddingTop': '25px' }}>
                     <div>
                         <h2>Instructions</h2>
-                        <TextField id="standard-basic" label="YouTube VideoID" defaultValue={this.state ? this.state.videoId : null} style={{ width: "600px" }} onChange={e => this.handleChange(e)} />
+                        <TextField id="standard-basic" label="YouTube VideoID" value={this.state ? this.state.videoId : null} defaultValue={this.state ? this.state.videoId : null} style={{ width: "600px" }} onChange={e => this.handleChange(e)} />
                         <Button variant="contained" color="primary" onClick={() => { this.startLoop() }} style={{ 'marginTop': "12px" }}>
                             Setup
                         </Button>
+                        <h2>Playlists</h2>
+                        {
+                            this.playlists.map((playlist, playlistIndex) => {
+                                return (
+                                    <div style={{ border: "1px solid black", padding: "12px", margin: "12px" }} key={playlist.Id}>
+                                        <p>{playlistIndex + 1}: {playlist.Name}</p>
+                                        <br />
+                                        <br />
+                                        {
+                                            playlist.Videos.map((video, videoIndex) => {
+                                                return (
+                                                    <div style={{ border: "1px solid black", margin: "12px", padding: "12px" }} key={video.Id}>
+                                                        <Button variant="contained" color="primary" onClick={() => { this.selectVideo(video) }} style={{ display: 'inline-block', 'marginTop': "12px" }}>
+                                                            Select
+                                                        </Button>
+                                                        <p style={{ display: "inline-block" }}>{videoIndex + 1}: {video.Name} ({video.StartTime}s - {video.EndTime}s)</p>
+                                                    </div>
+                                                );
+                                            })
+                                        }
+                                    </div>
+                                );
+                            })
+                        }
+
                         <h3>Overview</h3>
                         <p>
                             You can use this tool to loop parts of a youtube video. In the URL above you can specify the video (v), start time (s), and end time (e) in the query string:
