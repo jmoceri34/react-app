@@ -19,8 +19,13 @@ export default class Playlists extends Component<PlaylistProps, PlaylistState> {
 
     constructor(props: PlaylistProps) {
         super(props);
+
+        const storedPlaylists = localStorage.getItem("Playlists");
+
+        let playlists = storedPlaylists !== null ? JSON.parse(storedPlaylists) : [];
+
         this.state = {
-            playlists: [],
+            playlists: playlists,
             selectedPlaylist: undefined
         };
     }
@@ -108,10 +113,17 @@ export default class Playlists extends Component<PlaylistProps, PlaylistState> {
         });
     }
 
+    saveChanges(): void {
+        localStorage.setItem("Playlists", JSON.stringify(this.state.playlists));
+    }
+
     render() {
         return (
             <div>
                 <h2>Playlists</h2>
+                <Button variant="contained" color="primary" onClick={() => { this.saveChanges() }} style={{ 'marginTop': "12px", display: "block" }}>
+                    Save Changes
+                </Button>
                 <Button variant="contained" color="primary" onClick={() => { this.addPlaylist() }} style={{ 'marginTop': "12px", display: "block" }}>
                     Add Playlist
                 </Button>

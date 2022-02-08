@@ -2,6 +2,7 @@ import $ from 'jquery';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import { Component } from 'react';
+import { Playlist } from '../playlists/playlist.model';
 require('jquery-ui/ui/widgets/slider');
 
 export interface VideoLoopToolProps {
@@ -25,6 +26,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
     urlParameters: URLSearchParams;
     queryStartTime: any;
     queryEndTime: any;
+    playlists: Playlist[];
 
     constructor(props: VideoLoopToolProps) {
         super(props);
@@ -42,6 +44,10 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         if (this.state && this.state.videoId) {
             this.startLoop();
         }
+
+        const storedPlaylists = localStorage.getItem("Playlists");
+
+        this.playlists = storedPlaylists !== null ? JSON.parse(storedPlaylists) : [];
     }
 
     // keep track when the user enters a new video id
