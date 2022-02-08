@@ -5,7 +5,6 @@ import { Playlist } from "./playlist.model";
 require('jquery-ui/ui/widgets/slider');
 
 export interface PlaylistProps {
-
 }
 
 export interface PlaylistState {
@@ -13,7 +12,7 @@ export interface PlaylistState {
     selectedPlaylist: Playlist | undefined;
 }
 
-export default class Playlists extends Component<PlaylistProps, PlaylistState> {
+class Playlists extends Component<PlaylistProps, PlaylistState> {
 
     state: PlaylistState;
 
@@ -168,3 +167,6 @@ export default class Playlists extends Component<PlaylistProps, PlaylistState> {
         );
     };
 };
+
+
+export default Playlists;

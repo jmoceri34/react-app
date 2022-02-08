@@ -251,7 +251,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                 <div style={{ display: 'block', 'textAlign': 'left', 'paddingTop': '25px' }}>
                     <div>
                         <h2>Instructions</h2>
-                        <TextField id="standard-basic" label="YouTube VideoID" value={this.state ? this.state.videoId : null} defaultValue={this.state ? this.state.videoId : null} style={{ width: "600px" }} onChange={e => this.handleChange(e)} />
+                        <TextField id="standard-basic" label="YouTube VideoID" value={this.state ? this.state.videoId || '' : ''} style={{ width: "600px" }} onChange={e => this.handleChange(e)} />
                         <Button variant="contained" color="primary" onClick={() => { this.startLoop() }} style={{ 'marginTop': "12px" }}>
                             Setup
                         </Button>

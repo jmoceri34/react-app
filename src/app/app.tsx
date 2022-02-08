@@ -4,7 +4,8 @@ import {
     BrowserRouter as Router,
     Routes,
     Route,
-    Link
+    Link,
+    BrowserRouter
 } from "react-router-dom";
 
 const VideoLoopTool = lazy(() => import('video-loop-tool/video-loop-tool.component'));
@@ -12,7 +13,7 @@ const Playlists = lazy(() => import('playlists/playlists.component'));
 
 function App() {
     return (
-        <Router>
+        <BrowserRouter>
             <Suspense fallback={<div>Loading...</div>}>
                 <div>
                     {/* Nav bar */}
@@ -34,7 +35,7 @@ function App() {
                     </Routes>
                 </div>
             </Suspense>
-        </Router>
+        </BrowserRouter>
     );
 }
 
