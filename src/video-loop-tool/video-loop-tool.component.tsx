@@ -237,83 +237,51 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
     render() {
         return (
-            <div style={{ 'textAlign': "left", 'width': '640px', 'margin': '0 auto' }}>
-                <h1>Video Loop Tool</h1>
-                <div style={{ display: 'block' }}>
-                    <div id="player"></div>
+            <div style={{ 'textAlign': "left", 'margin': '0 auto', display: 'flex' }}>
+                <div>
+                    <div style={{ display: 'block', 'textAlign': 'left', paddingRight: '36px', paddingLeft: '24px' }}>
+                        <div>
+                            <h1>Playlists</h1>
+                            {
+                                this.playlists.map((playlist, playlistIndex) => {
+                                    return (
+                                        <div style={{ border: "1px solid black", padding: "12px", margin: "12px" }} key={playlist.Id}>
+                                            <p>{playlistIndex + 1}: {playlist.Name}</p>
+                                            {
+                                                playlist.Videos.map((video, videoIndex) => {
+                                                    return (
+                                                        <div style={{ border: "1px solid black", margin: "12px", padding: "12px" }} key={video.Id}>
+                                                            <Button variant="contained" color="primary" onClick={() => { this.selectVideo(video) }} style={{ display: 'inline-block', 'marginTop': "12px", "marginRight": "12px" }}>
+                                                                Select
+                                                            </Button>
+                                                            <p style={{ display: "inline-block" }}>{videoIndex + 1}: {video.Name} ({video.StartTime}s - {video.EndTime}s)</p>
+                                                        </div>
+                                                    );
+                                                })
+                                            }
+                                        </div>
+                                    );
+                                })
+                            }
+                        </div>
+                    </div>
                 </div>
-                <div style={{ display: 'block' }}>
-
-                </div>
-                <div style={{ display: 'block' }}>
-                    <div id="slider-range" style={{ width: "640px", margin: '12px auto' }}></div>
-                </div>
-                <div style={{ display: 'block', 'textAlign': 'left', 'paddingTop': '25px' }}>
-                    <div>
-                        <h2>Instructions</h2>
-                        <TextField id="standard-basic" label="YouTube VideoID" value={this.state ? this.state.videoId || '' : ''} style={{ width: "600px" }} onChange={e => this.handleChange(e)} />
-                        <Button variant="contained" color="primary" onClick={() => { this.startLoop() }} style={{ 'marginTop': "12px" }}>
+                <div>
+                    <h1>Video Loop Tool</h1>
+                    <div style={{ display: 'flex' }}>
+                        <Button variant="contained" color="primary" onClick={() => { this.startLoop() }} style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
                             Setup
                         </Button>
-                        <h2>Playlists</h2>
-                        {
-                            this.playlists.map((playlist, playlistIndex) => {
-                                return (
-                                    <div style={{ border: "1px solid black", padding: "12px", margin: "12px" }} key={playlist.Id}>
-                                        <p>{playlistIndex + 1}: {playlist.Name}</p>
-                                        <br />
-                                        <br />
-                                        {
-                                            playlist.Videos.map((video, videoIndex) => {
-                                                return (
-                                                    <div style={{ border: "1px solid black", margin: "12px", padding: "12px" }} key={video.Id}>
-                                                        <Button variant="contained" color="primary" onClick={() => { this.selectVideo(video) }} style={{ display: 'inline-block', 'marginTop': "12px" }}>
-                                                            Select
-                                                        </Button>
-                                                        <p style={{ display: "inline-block" }}>{videoIndex + 1}: {video.Name} ({video.StartTime}s - {video.EndTime}s)</p>
-                                                    </div>
-                                                );
-                                            })
-                                        }
-                                    </div>
-                                );
-                            })
-                        }
+                        <TextField id="standard-basic" label="YouTube VideoID" value={this.state ? this.state.videoId || '' : ''} style={{ width: "200px" }} onChange={e => this.handleChange(e)} />
+                    </div>
+                    <div style={{ display: 'block' }}>
+                        <div id="player"></div>
+                    </div>
+                    <div style={{ display: 'block' }}>
 
-                        <h3>Overview</h3>
-                        <p>
-                            You can use this tool to loop parts of a youtube video. In the URL above you can specify the video (v), start time (s), and end time (e) in the query string:
-                        </p>
-                        <p>
-                            https://joemoceri.github.io/video-loop-tool?<strong>v</strong>=<strong>&#123;youtubeVideoId&#125;</strong>&<strong>s</strong>=<strong>&#123;startTimeInSeconds&#125;</strong>&<strong>e</strong>=<strong>&#123;endTimeInSeconds&#125;</strong>
-                        </p>
-                        <p>
-                            The URL will update as you update the video id and slider.
-                        </p>
-                        <h3>Method 1</h3>
-                        <p>
-                            Say you have a youtube url like this (where videoId is the youtube video id)
-                        </p>
-                        <p>
-                            <strong>https://www.youtube.com/watch?v=videoId</strong>
-                        </p>
-                        <p>
-                            If you change it to this
-                        </p>
-                        <p>
-                            <strong>https://joemoceri.github.io/video-loop-tool?v=videoId</strong>
-                        </p>
-                        <p>
-                            By replacing
-                        </p>
-                        <p>
-                            <strong>https://www.youtube.com/watch</strong> with <strong>https://joemoceri.github.io/video-loop-tool</strong>
-                        </p>
-                        <p>you can add additional looping capabilities to any youtube video.</p>
-                        <h3>Method 2</h3>
-                        <p>
-                            You can also grab the video id and put it into the field above. Run setup first when changing the video id, then hit play on the youtube video. You can change the range on the slider below to loop a specific part of the video. Then hit play.
-                        </p>
+                    </div>
+                    <div style={{ display: 'block' }}>
+                        <div id="slider-range" style={{ width: "640px", margin: '12px auto' }}></div>
                     </div>
                 </div>
             </div>

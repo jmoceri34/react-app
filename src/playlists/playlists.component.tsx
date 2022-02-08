@@ -118,7 +118,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
 
     render() {
         return (
-            <div>
+            <div style={{ paddingLeft: '24px' }}>
                 <h2>Playlists</h2>
                 <Button variant="contained" color="primary" onClick={() => { this.saveChanges() }} style={{ 'marginTop': "12px", display: "block" }}>
                     Save Changes

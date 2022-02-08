@@ -7,9 +7,11 @@ import {
     Link,
     BrowserRouter
 } from "react-router-dom";
+import { Button } from '@material-ui/core';
 
 const VideoLoopTool = lazy(() => import('video-loop-tool/video-loop-tool.component'));
 const Playlists = lazy(() => import('playlists/playlists.component'));
+const Instructions = lazy(() => import('instructions/instructions.component'));
 
 function App() {
     return (
@@ -17,20 +19,31 @@ function App() {
             <Suspense fallback={<div>Loading...</div>}>
                 <div>
                     {/* Nav bar */}
-                    <ul>
-                        <li>
-                            <Link to="/video-loop-tool">Video Loop Tool</Link>
-                        </li>
-                        <li>
-                            <Link to="/playlists">Playlists</Link>
-                        </li>
-                    </ul>
+                    <div style={{ display: 'flex', paddingLeft: '12px'/*, alignItems: 'center', justifyContent: 'center' */}}>
+                        <Link to="/video-loop-tool" style={{ textDecoration: 'none' }}>
+                            <Button variant="contained" color="primary" style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
+                                Video Loop Tool
+                            </Button>
+                        </Link>
+                        <Link to="/playlists" style={{ textDecoration: 'none' }}>
+                            <Button variant="contained" color="primary" style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
+                                Playlists
+                            </Button>
+                        </Link>
+                        <Link to="/instructions" style={{ textDecoration: 'none' }}>
+                            <Button variant="contained" color="primary" style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
+                                Instructions
+                            </Button>
+                        </Link>
+                    </div>
 
                     {/* Routes */}
                     <Routes>
+                        <Route path="/video-loop-tool" element={<VideoLoopTool />}>
+                        </Route>
                         <Route path="/playlists" element={<Playlists />}>
                         </Route>
-                        <Route path="/video-loop-tool" element={<VideoLoopTool />}>
+                        <Route path="/instructions" element={<Instructions />}>
                         </Route>
                     </Routes>
                 </div>
