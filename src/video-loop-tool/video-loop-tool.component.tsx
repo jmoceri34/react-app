@@ -4,6 +4,8 @@ import Button from '@material-ui/core/Button';
 import { Component } from 'react';
 import { Playlist } from '../playlists/playlist.model';
 import { Video } from '../playlists/video.model';
+import { InputLabel, MenuItem, Select } from '@material-ui/core';
+import { JsxElement } from 'typescript';
 require('jquery-ui/ui/widgets/slider');
 
 export interface VideoLoopToolProps {
@@ -12,6 +14,7 @@ export interface VideoLoopToolProps {
 
 export interface VideoLoopToolState {
     videoId: string;
+    selectedPlaylist: number | undefined;
 }
 
 export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLoopToolState> {
@@ -36,7 +39,8 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         this.urlParameters = new URLSearchParams(window.location.search);
 
         this.state = {
-            videoId: this.urlParameters.get("v")!
+            videoId: this.urlParameters.get("v")!,
+            selectedPlaylist: undefined
         }
 
         this.queryStartTime = this.urlParameters.get("s");
@@ -235,32 +239,56 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         });
     }
 
+    handlePlaylistDropdownChange(e: any): void {
+        this.setState({
+            selectedPlaylist: parseInt(e.target.value)
+        });
+    }
+
     render() {
+        let playlistVideoHtml: JSX.Element[] = [];
+        if (this.state.selectedPlaylist !== undefined) {
+            playlistVideoHtml.push(<p>{this.state.selectedPlaylist! + 1}: {this.playlists[this.state.selectedPlaylist!].Name}</p>);
+
+            let elements = this.playlists[this.state.selectedPlaylist!].Videos.map((video, videoIndex) => {
+                return (
+                    <div style={{ border: "1px solid black", margin: "12px", padding: "12px" }} key={video.Id}>
+                        <Button variant="contained" color="primary" onClick={() => { this.selectVideo(video) }} style={{ display: 'inline-block', 'marginTop': "12px", "marginRight": "12px" }}>
+                            Select
+                        </Button>
+                        <p style={{ display: "inline-block" }}>{videoIndex + 1}: {video.Name} ({video.StartTime}s - {video.EndTime}s)</p>
+                    </div>
+                )
+            })
+
+            for (var i = 0; i < elements.length; i++) {
+                playlistVideoHtml.push(elements[i]);
+            }
+        }
+
         return (
             <div style={{ 'textAlign': "left", 'margin': '0 auto', display: 'flex' }}>
                 <div>
                     <div style={{ display: 'block', 'textAlign': 'left', paddingRight: '36px', paddingLeft: '24px' }}>
                         <div>
                             <h1>Playlists</h1>
+                            <Select
+                                label="Playlists"
+                                displayEmpty
+                                renderValue={this.state.selectedPlaylist !== undefined ? undefined : () => 'Playlists'}
+                                defaultValue="Playlists"
+                                onChange={e => this.handlePlaylistDropdownChange(e)}>
+                                {
+                                    this.playlists.map((playlist, playlistIndex) => {
+                                        return (
+                                            <MenuItem value={playlistIndex}>#{playlistIndex + 1}: {playlist.Name}</MenuItem>
+                                            );
+                                    })
+                                }
+                            </Select>
                             {
-                                this.playlists.map((playlist, playlistIndex) => {
-                                    return (
-                                        <div style={{ border: "1px solid black", padding: "12px", margin: "12px" }} key={playlist.Id}>
-                                            <p>{playlistIndex + 1}: {playlist.Name}</p>
-                                            {
-                                                playlist.Videos.map((video, videoIndex) => {
-                                                    return (
-                                                        <div style={{ border: "1px solid black", margin: "12px", padding: "12px" }} key={video.Id}>
-                                                            <Button variant="contained" color="primary" onClick={() => { this.selectVideo(video) }} style={{ display: 'inline-block', 'marginTop': "12px", "marginRight": "12px" }}>
-                                                                Select
-                                                            </Button>
-                                                            <p style={{ display: "inline-block" }}>{videoIndex + 1}: {video.Name} ({video.StartTime}s - {video.EndTime}s)</p>
-                                                        </div>
-                                                    );
-                                                })
-                                            }
-                                        </div>
-                                    );
+                                playlistVideoHtml.map(element => {
+                                    return element;
                                 })
                             }
                         </div>

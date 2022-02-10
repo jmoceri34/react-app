@@ -131,7 +131,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                     (this.state.playlists).map((playlist, playlistIndex) => {
                         return (
                             <div style={{ border: "1px solid black", padding: "12px", margin: "12px" }} key={playlist.Id}>
-                                <TextField id="standard-basic" label="Playlist Id" value={playlist.Id} style={{ "width": "600px", "marginRight": "12px" }} />
+                                <p><strong>Playlist #{playlistIndex + 1}</strong></p>
                                 <TextField id="standard-basic" label="Playlist Name" defaultValue={playlist.Name} onChange={e => this.handlePlaylistChange(e, playlistIndex, "Name")} style={{ width: "600px", "marginRight": "12px" }} />
                                 <br />
                                 <br />
@@ -142,11 +142,11 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                                     playlist.Videos.map((video, videoIndex) => {
                                         return (
                                             <div style={{ border: "1px solid black", margin: "12px", padding: "12px" }} key={video.Id}>
-                                                <TextField id="standard-basic" label="Video Id" value={video.Id} style={{ "width": "600px", "marginRight": "12px" }} />
-                                                <TextField id="standard-basic" label="Video Name" defaultValue={video.Name} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "Name")} style={{ "width": "600px", "marginRight": "12px" }} />
-                                                <TextField id="standard-basic" label="Video VideoId" defaultValue={video.VideoId} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "VideoId")} style={{ "width": "600px", "marginRight": "12px" }} />
-                                                <TextField id="standard-basic" label="Video StartTime" defaultValue={video.StartTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "StartTime")} style={{ "width": "600px", "marginRight": "12px" }} />
-                                                <TextField id="standard-basic" label="Video EndTime" defaultValue={video.EndTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "EndTime")} style={{ "width": "600px", "marginRight": "12px" }} />
+                                                <p><strong>Playlist #{playlistIndex + 1} Video #{videoIndex + 1}</strong></p>
+                                                <TextField id="standard-basic" label="Video Name" defaultValue={video.Name} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "Name")} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                <TextField id="standard-basic" label="Video VideoId" defaultValue={video.VideoId} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "VideoId")} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                <TextField id="standard-basic" label="Video StartTime" defaultValue={video.StartTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "StartTime")} style={{ "width": "150px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                <TextField id="standard-basic" label="Video EndTime" defaultValue={video.EndTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "EndTime")} style={{ "width": "150px", "marginRight": "12px", marginBottom: '12px' }} />
                                                 <br />
                                                 <br />
                                                 <Button variant="contained" color="secondary" onClick={() => { this.removeVideo(playlist.Id, video.Id) }} style={{ 'marginTop': "12px", display: "block" }}>
