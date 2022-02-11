@@ -17,7 +17,6 @@ export interface PlaylistState {
 class Playlists extends Component<PlaylistProps, PlaylistState> {
 
     state: PlaylistState;
-    unsavedChanges: boolean;
 
     constructor(props: PlaylistProps) {
         super(props);
@@ -37,8 +36,6 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
             playlists: playlists,
             selectedPlaylist: selectedPlaylist
         };
-
-        this.unsavedChanges = true;
     }
 
     addPlaylist(): void {
@@ -196,7 +193,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
         return (
             <div>
                 <Prompt
-                    when={this.unsavedChanges}
+                    when={true}
                     message={(location, action) => this.promptMessageCallback(location, action)}
                 />
                 <Card variant="outlined" style={{ margin: '12px' }}>
