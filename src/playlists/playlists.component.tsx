@@ -169,15 +169,18 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                                     return (
                                         <Card variant="outlined" style={{ "margin": "12px" }} key={video.Id}>
                                             <CardContent>
-                                                <div>
+                                                <div style={{display: 'flex', flexWrap: 'wrap' }}>
                                                     {/*<p><strong>Playlist #{playlistIndex + 1} Video #{videoIndex + 1}</strong></p>*/}
+                                                    <img src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", marginBottom: '12px'}} />
                                                     <TextField id="standard-basic" label="Video Name" defaultValue={video.Name} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "Name")} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
                                                     <TextField id="standard-basic" label="Video VideoId" defaultValue={video.VideoId} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "VideoId")} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
                                                     <TextField id="standard-basic" label="Video StartTime" defaultValue={video.StartTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "StartTime")} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
                                                     <TextField id="standard-basic" label="Video EndTime" defaultValue={video.EndTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "EndTime")} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
-                                                    <Button variant="contained" color="secondary" onClick={() => { this.removeVideo(playlist.Id, video.Id) }} style={{ 'marginTop': "12px" }}>
-                                                        Remove Video
-                                                    </Button>
+                                                    <div style={{ alignSelf: 'center' }}>
+                                                        <Button variant="contained" color="secondary" onClick={() => { this.removeVideo(playlist.Id, video.Id) }}>
+                                                            Remove Video
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                             </CardContent>
                                         </Card>
@@ -196,10 +199,13 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                     when={this.unsavedChanges}
                     message={(location, action) => this.promptMessageCallback(location, action)}
                 />
-                <Card variant="outlined" style={{ margin: '12px', padding: '0 !important' }}>
-                    <CardContent style={{ padding: '0 !important' }}>
+                <Card variant="outlined" style={{ margin: '12px' }}>
+                    <CardContent>
 
                         <h2>Playlists</h2>
+                        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+
+                        </div>
                         <Select
                             label="Playlists"
                             displayEmpty
@@ -216,10 +222,10 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                                 })
                             }
                         </Select>
-                        <Button variant="contained" color="primary" onClick={() => { this.addPlaylist() }} style={{ 'marginTop': "12px", marginRight: '12px' }}>
+                        <Button variant="contained" color="primary" onClick={() => { this.addPlaylist() }} style={{ marginRight: '12px' }}>
                             Add New Playlist
                         </Button>
-                        <Button variant="contained" color="primary" onClick={() => { this.saveChanges() }} style={{ 'marginTop': "12px", marginRight: '12px' }}>
+                        <Button variant="contained" color="primary" onClick={() => { this.saveChanges() }} style={{ marginRight: '12px' }}>
                             Save Changes
                         </Button>
                     </CardContent>

@@ -37,9 +37,20 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         // get the query string parameters if any
         this.urlParameters = new URLSearchParams(window.location.search);
 
+        const storedPlaylists = localStorage.getItem("Playlists");
+
+        this.playlists = storedPlaylists !== null ? JSON.parse(storedPlaylists) : [];
+
+        let selectedPlaylist = undefined;
+
+        // show the first playlist if there are any
+        if (this.playlists.length > 0) {
+            selectedPlaylist = 0;
+        }
+
         this.state = {
             videoId: this.urlParameters.get("v")!,
-            selectedPlaylist: undefined
+            selectedPlaylist: selectedPlaylist
         }
 
         this.queryStartTime = this.urlParameters.get("s");
@@ -48,10 +59,6 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         if (this.state && this.state.videoId) {
             this.startLoop();
         }
-
-        const storedPlaylists = localStorage.getItem("Playlists");
-
-        this.playlists = storedPlaylists !== null ? JSON.parse(storedPlaylists) : [];
     }
 
     // keep track when the user enters a new video id
@@ -247,17 +254,19 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
     render() {
         let playlistVideoHtml: JSX.Element[] = [];
         if (this.state.selectedPlaylist !== undefined) {
-            playlistVideoHtml.push(<p>{this.state.selectedPlaylist! + 1}: {this.playlists[this.state.selectedPlaylist!].Name}</p>);
-
             let elements = this.playlists[this.state.selectedPlaylist!].Videos.map((video, videoIndex) => {
                 return (
                 <Card variant="outlined" style={{ margin: '12px', padding: '0 !important' }}>
-                    <CardContent style={{ padding: '0 !important' }}>
-                        <div style={{ }} key={video.Id}>
-                            <Button variant="contained" color="primary" onClick={() => { this.selectVideo(video) }} style={{ display: 'inline-block', 'marginTop': "12px", "marginRight": "12px" }}>
-                                Select
-                            </Button>
-                            <p style={{ display: "inline-block" }}>{videoIndex + 1}: {video.Name} ({video.StartTime}s - {video.EndTime}s)</p>
+                    <CardContent style={{ paddingBottom: '0 !important' }}>
+                        <div key={video.Id} style={{ display: 'flex', flexWrap: 'wrap'}}>
+                            <img src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px" }} />
+
+                            <div style={{ alignSelf: 'center' }}>
+                                <Button variant="contained" color="primary" onClick={() => { this.selectVideo(video) }} style={{ "marginRight": "12px" }}>
+                                    Select
+                                </Button>
+                            </div>
+                            <p>{videoIndex + 1}: {video.Name} ({video.StartTime}s - {video.EndTime}s)</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -280,7 +289,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                     <Select
                                         label="Playlists"
                                         displayEmpty
-                                        renderValue={this.state.selectedPlaylist !== undefined ? undefined : () => 'Playlists'}
+                                        renderValue={this.state.selectedPlaylist !== undefined ? () => this.playlists[this.state.selectedPlaylist!].Name : () => 'Playlists'}
                                         defaultValue="Playlists"
                                         onChange={e => this.handlePlaylistDropdownChange(e)}
                                         style={{ 'minWidth': '200px'}}

@@ -23,7 +23,7 @@ export default class Instructions extends Component<InstructionsProps, Instructi
                         <div style={{ 'textAlign': "left", 'width': '640px' }}>
                             <div style={{ display: 'block', 'textAlign': 'left' }}>
                                 <div>
-                                    <h2>Instructions</h2>
+                                <h2>Instructions</h2>
                                     <h3>Overview</h3>
                                     <p>
                                         You can use this tool to loop parts of a youtube video. In the URL above you can specify the video (v), start time (s), and end time (e) in the query string:
@@ -57,7 +57,10 @@ export default class Instructions extends Component<InstructionsProps, Instructi
                                     <h3>Method 2</h3>
                                     <p>
                                         You can also grab the video id and put it into the field above. Run setup first when changing the video id, then hit play on the youtube video. You can change the range on the slider below to loop a specific part of the video. Then hit play.
-                                    </p>
+                                </p>
+                                    <hr />
+                                    <h2>How to gif below</h2>
+                                    <img src={process.env.PUBLIC_URL + '/video-loop-tool-how-to-gif.gif'} />
                                 </div>
                             </div>
                         </div>
