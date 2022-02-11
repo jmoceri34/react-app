@@ -1,13 +1,12 @@
 import './app.css';
 import { Suspense, lazy } from "react";
 import {
-    BrowserRouter as Router,
-    Routes,
     Route,
     Link,
-    BrowserRouter
+    BrowserRouter,
+    Switch
 } from "react-router-dom";
-import { Button } from '@material-ui/core';
+import { Button, Card, CardContent } from '@material-ui/core';
 
 const VideoLoopTool = lazy(() => import('video-loop-tool/video-loop-tool.component'));
 const Playlists = lazy(() => import('playlists/playlists.component'));
@@ -19,33 +18,37 @@ function App() {
             <Suspense fallback={<div>Loading...</div>}>
                 <div>
                     {/* Nav bar */}
-                    <div style={{ display: 'flex', paddingLeft: '12px'/*, alignItems: 'center', justifyContent: 'center' */}}>
-                        <Link to="/video-loop-tool" style={{ textDecoration: 'none' }}>
-                            <Button variant="contained" color="primary" style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
-                                Video Loop Tool
-                            </Button>
-                        </Link>
-                        <Link to="/playlists" style={{ textDecoration: 'none' }}>
-                            <Button variant="contained" color="primary" style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
-                                Playlists
-                            </Button>
-                        </Link>
-                        <Link to="/instructions" style={{ textDecoration: 'none' }}>
-                            <Button variant="contained" color="primary" style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
-                                Instructions
-                            </Button>
-                        </Link>
-                    </div>
+                    <Card style={{margin: '12px', padding: '0 !important'}}>
+                        <CardContent style={{ 'padding': '0 !important' }}>
+                            <div style={{ display: 'flex' }}>
+                                <Link to="/video-loop-tool" style={{ textDecoration: 'none' }}>
+                                    <Button variant="contained" color="primary" style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
+                                        Video Loop Tool
+                                    </Button>
+                                </Link>
+                                <Link to="/playlists" style={{ textDecoration: 'none' }}>
+                                    <Button variant="contained" color="primary" style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
+                                        Playlists
+                                    </Button>
+                                </Link>
+                                <Link to="/instructions" style={{ textDecoration: 'none' }}>
+                                    <Button variant="contained" color="primary" style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
+                                        Instructions
+                                    </Button>
+                                </Link>
+                            </div>
+                        </CardContent>
+                    </Card>
 
                     {/* Routes */}
-                    <Routes>
-                        <Route path="/video-loop-tool" element={<VideoLoopTool />}>
+                    <Switch>
+                        <Route path="/video-loop-tool" component={VideoLoopTool}>
                         </Route>
-                        <Route path="/playlists" element={<Playlists />}>
+                        <Route path="/playlists" component={Playlists}>
                         </Route>
-                        <Route path="/instructions" element={<Instructions />}>
+                        <Route path="/instructions" component={Instructions}>
                         </Route>
-                    </Routes>
+                    </Switch>
                 </div>
             </Suspense>
         </BrowserRouter>

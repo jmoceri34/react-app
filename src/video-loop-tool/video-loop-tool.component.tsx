@@ -4,8 +4,7 @@ import Button from '@material-ui/core/Button';
 import { Component } from 'react';
 import { Playlist } from '../playlists/playlist.model';
 import { Video } from '../playlists/video.model';
-import { InputLabel, MenuItem, Select } from '@material-ui/core';
-import { JsxElement } from 'typescript';
+import { MenuItem, Select } from '@material-ui/core';
 require('jquery-ui/ui/widgets/slider');
 
 export interface VideoLoopToolProps {
@@ -258,8 +257,8 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                         </Button>
                         <p style={{ display: "inline-block" }}>{videoIndex + 1}: {video.Name} ({video.StartTime}s - {video.EndTime}s)</p>
                     </div>
-                )
-            })
+                );
+            });
 
             for (var i = 0; i < elements.length; i++) {
                 playlistVideoHtml.push(elements[i]);
@@ -281,7 +280,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                 {
                                     this.playlists.map((playlist, playlistIndex) => {
                                         return (
-                                            <MenuItem value={playlistIndex}>#{playlistIndex + 1}: {playlist.Name}</MenuItem>
+                                            <MenuItem key={playlistIndex} value={playlistIndex}>#{playlistIndex + 1}: {playlist.Name}</MenuItem>
                                             );
                                     })
                                 }

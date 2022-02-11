@@ -1,7 +1,7 @@
 import { Video } from "./video.model";
 
 export interface Playlist {
-    Id: string;
+    Id: number;
     Name: string;
     Videos: Video[];
     [key: string]: any;

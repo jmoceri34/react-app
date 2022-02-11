@@ -1,5 +1,5 @@
 export interface Video {
-    Id: string;
+    Id: number;
     Name: string;
     VideoId: string;
     StartTime: number;
