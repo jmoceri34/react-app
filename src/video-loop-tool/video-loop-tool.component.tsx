@@ -4,7 +4,7 @@ import Button from '@material-ui/core/Button';
 import { Component } from 'react';
 import { Playlist } from '../playlists/playlist.model';
 import { Video } from '../playlists/video.model';
-import { MenuItem, Select } from '@material-ui/core';
+import { Card, CardContent, MenuItem, Select } from '@material-ui/core';
 require('jquery-ui/ui/widgets/slider');
 
 export interface VideoLoopToolProps {
@@ -251,12 +251,16 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
             let elements = this.playlists[this.state.selectedPlaylist!].Videos.map((video, videoIndex) => {
                 return (
-                    <div style={{ border: "1px solid black", margin: "12px", padding: "12px" }} key={video.Id}>
-                        <Button variant="contained" color="primary" onClick={() => { this.selectVideo(video) }} style={{ display: 'inline-block', 'marginTop': "12px", "marginRight": "12px" }}>
-                            Select
-                        </Button>
-                        <p style={{ display: "inline-block" }}>{videoIndex + 1}: {video.Name} ({video.StartTime}s - {video.EndTime}s)</p>
-                    </div>
+                <Card variant="outlined" style={{ margin: '12px', padding: '0 !important' }}>
+                    <CardContent style={{ padding: '0 !important' }}>
+                        <div style={{ }} key={video.Id}>
+                            <Button variant="contained" color="primary" onClick={() => { this.selectVideo(video) }} style={{ display: 'inline-block', 'marginTop': "12px", "marginRight": "12px" }}>
+                                Select
+                            </Button>
+                            <p style={{ display: "inline-block" }}>{videoIndex + 1}: {video.Name} ({video.StartTime}s - {video.EndTime}s)</p>
+                        </div>
+                    </CardContent>
+                </Card>
                 );
             });
 
@@ -266,52 +270,58 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         }
 
         return (
-            <div style={{ 'textAlign': "left", 'margin': '0 auto', display: 'flex' }}>
-                <div>
-                    <div style={{ display: 'block', 'textAlign': 'left', paddingRight: '36px', paddingLeft: '24px' }}>
+            <Card variant="outlined" style={{ margin: '12px', padding: '0 !important', 'minHeight': '750px' }}>
+                    <CardContent style={{ padding: '0 !important' }}>
+                    <div style={{ 'textAlign': "left", 'margin': '0 auto', display: 'flex' }}>
                         <div>
-                            <h1>Playlists</h1>
-                            <Select
-                                label="Playlists"
-                                displayEmpty
-                                renderValue={this.state.selectedPlaylist !== undefined ? undefined : () => 'Playlists'}
-                                defaultValue="Playlists"
-                                onChange={e => this.handlePlaylistDropdownChange(e)}>
-                                {
-                                    this.playlists.map((playlist, playlistIndex) => {
-                                        return (
-                                            <MenuItem key={playlistIndex} value={playlistIndex}>#{playlistIndex + 1}: {playlist.Name}</MenuItem>
-                                            );
-                                    })
-                                }
-                            </Select>
-                            {
-                                playlistVideoHtml.map(element => {
-                                    return element;
-                                })
-                            }
+                            <div style={{ display: 'block', 'textAlign': 'left', paddingRight: '36px' }}>
+                                <div>
+                                    <h1>Playlists</h1>
+                                    <Select
+                                        label="Playlists"
+                                        displayEmpty
+                                        renderValue={this.state.selectedPlaylist !== undefined ? undefined : () => 'Playlists'}
+                                        defaultValue="Playlists"
+                                        onChange={e => this.handlePlaylistDropdownChange(e)}
+                                        style={{ 'minWidth': '200px'}}
+                                    >
+                                        {
+                                            this.playlists.map((playlist, playlistIndex) => {
+                                                return (
+                                                    <MenuItem key={playlist.Id} value={playlistIndex}>#{playlist.Id}: {playlist.Name}</MenuItem>
+                                                );
+                                            })
+                                        }
+                                    </Select>
+                                    {
+                                        playlistVideoHtml.map(element => {
+                                            return element;
+                                        })
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h1>Video Loop Tool</h1>
+                            <div style={{ display: 'flex' }}>
+                                <Button variant="contained" color="primary" onClick={() => { this.startLoop() }} style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
+                                    Setup
+                                </Button>
+                                <TextField id="standard-basic" label="YouTube VideoID" value={this.state ? this.state.videoId || '' : ''} style={{ width: "200px" }} onChange={e => this.handleChange(e)} />
+                            </div>
+                            <div style={{ display: 'block' }}>
+                                <div id="player"></div>
+                            </div>
+                            <div style={{ display: 'block' }}>
+
+                            </div>
+                            <div style={{ display: 'block' }}>
+                                <div id="slider-range" style={{ width: "640px", margin: '12px auto' }}></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div>
-                    <h1>Video Loop Tool</h1>
-                    <div style={{ display: 'flex' }}>
-                        <Button variant="contained" color="primary" onClick={() => { this.startLoop() }} style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
-                            Setup
-                        </Button>
-                        <TextField id="standard-basic" label="YouTube VideoID" value={this.state ? this.state.videoId || '' : ''} style={{ width: "200px" }} onChange={e => this.handleChange(e)} />
-                    </div>
-                    <div style={{ display: 'block' }}>
-                        <div id="player"></div>
-                    </div>
-                    <div style={{ display: 'block' }}>
-
-                    </div>
-                    <div style={{ display: 'block' }}>
-                        <div id="slider-range" style={{ width: "640px", margin: '12px auto' }}></div>
-                    </div>
-                </div>
-            </div>
+                    </CardContent>
+                </Card>
         );
     }
 };

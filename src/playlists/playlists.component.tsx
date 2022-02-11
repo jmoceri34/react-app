@@ -26,9 +26,16 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
 
         let playlists = storedPlaylists !== null ? JSON.parse(storedPlaylists) : [];
 
+        let selectedPlaylist = undefined;
+
+        // show the first playlist if there are any
+        if (playlists.length > 0) {
+            selectedPlaylist = 0;
+        }
+
         this.state = {
             playlists: playlists,
-            selectedPlaylist: undefined
+            selectedPlaylist: selectedPlaylist
         };
 
         this.unsavedChanges = true;
@@ -189,14 +196,14 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                     when={this.unsavedChanges}
                     message={(location, action) => this.promptMessageCallback(location, action)}
                 />
-                <Card style={{ margin: '12px', padding: '0 !important' }}>
+                <Card variant="outlined" style={{ margin: '12px', padding: '0 !important' }}>
                     <CardContent style={{ padding: '0 !important' }}>
 
                         <h2>Playlists</h2>
                         <Select
                             label="Playlists"
                             displayEmpty
-                            renderValue={this.state.selectedPlaylist !== undefined ? undefined : () => 'Playlists'}
+                            renderValue={this.state.selectedPlaylist !== undefined ? () => this.state.playlists[this.state.selectedPlaylist!].Name : () => 'Playlists'}
                             defaultValue="Playlists"
                             onChange={e => this.handlePlaylistDropdownChange(e)}
                             style={{ marginRight: '24px', 'minWidth': '200px' }}
