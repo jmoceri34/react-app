@@ -6,7 +6,6 @@ import Slider from '@mui/material/Slider';
 import { Button, Card, CardContent, MenuItem, Select, styled, TextField } from '@mui/material';
 import DOMPurify from 'dompurify';
 import './video-loop-tool.css';
-require('jquery-ui/ui/widgets/slider');
 
 export interface VideoLoopToolProps {
 
