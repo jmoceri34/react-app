@@ -1,10 +1,9 @@
 import $ from 'jquery';
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
 import { Component } from 'react';
 import { Playlist } from '../playlists/playlist.model';
 import { Video } from '../playlists/video.model';
-import { Card, CardContent, MenuItem, Select } from '@material-ui/core';
+import Slider from '@mui/material/Slider';
+import { Button, Card, CardContent, MenuItem, Select, styled, TextField } from '@mui/material';
 require('jquery-ui/ui/widgets/slider');
 
 export interface VideoLoopToolProps {
@@ -14,7 +13,16 @@ export interface VideoLoopToolProps {
 export interface VideoLoopToolState {
     videoId: string;
     selectedPlaylist: number | undefined;
+    sliderValues: number[];
 }
+
+
+const VideoSlider = styled(Slider)(({ theme }) => ({
+    '& .MuiSlider-thumb': {
+        height: 36,
+        width: 36,
+    },
+}));
 
 export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLoopToolState> {
 
@@ -50,7 +58,8 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
         this.state = {
             videoId: this.urlParameters.get("v")!,
-            selectedPlaylist: selectedPlaylist
+            selectedPlaylist: selectedPlaylist,
+            sliderValues: [0, 0]
         }
 
         this.queryStartTime = this.urlParameters.get("s");
@@ -116,22 +125,20 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
     createSlider(min: number, max: number): void {
 
-        var slider = ($("#slider-range") as any).slider({
-            range: true,
-            // this should always be 0 -> duration
-            min: 0,
-            max: this.player.getDuration(),
-            values: [min, max],
-            slide: (event: any, ui: any) => {
-                this.sliderMoved(ui.values[0], ui.values[1]);
-            }
-        });
+        let newSlider = $(".videoSlider")[0] as any;
+        let newLeftHandle = $(newSlider.children[newSlider.children.length - 2]);
+        let newRightHandle = $(newSlider.children[newSlider.children.length -1]);
 
-        $(slider[0].children[1]).empty();
-        $(slider[0].children[2]).empty();
+        if (newLeftHandle.children("#videoSliderTime").length > 0) {
+            newLeftHandle.children("#videoSliderTime").remove();
+        }
 
-        this.leftHandle = $(slider[0].children[1]).prepend(this.wrap(min, true, true));
-        this.rightHandle = $(slider[0].children[2]).prepend(this.wrap(max, true, false));
+        if (newRightHandle.children("#videoSliderTime").length > 0) {
+            newRightHandle.children("#videoSliderTime").remove();
+        }
+
+        this.leftHandle = newLeftHandle.prepend(this.wrap(min, true, true));
+        this.rightHandle = newRightHandle.prepend(this.wrap(max, true, false));
 
         this.leftValue = min;
         this.rightValue = max;
@@ -142,6 +149,10 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
         var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + this.urlParameters.toString();
         window.history.pushState({ path: newurl }, '', newurl);
+
+        this.setState({
+            sliderValues: [this.leftValue, this.rightValue]
+        });
     }
 
     sliderMoved(startTime: any, endTime: any): void {
@@ -150,13 +161,13 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         this.rightValue = endTime;
 
         if (this.leftHandle) {
-            this.leftHandle[0].innerHTML = this.wrap(this.leftValue, true, true);
+            this.leftHandle[0].children[0].innerHTML = new Date(this.leftValue * 1000).toISOString().substr(11, 8);
             // update the query string parameter
             this.urlParameters.set("s", this.leftValue);
         }
 
         if (this.rightHandle) {
-            this.rightHandle[0].innerHTML = this.wrap(this.rightValue, true, false);
+            this.rightHandle[0].children[0].innerHTML = new Date(this.rightValue * 1000).toISOString().substr(11, 8);
             // update the query string parameter
             this.urlParameters.set("e", this.rightValue);
         }
@@ -175,7 +186,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
             value = new Date(value * 1000).toISOString().substr(11, 8);
         }
         var px = left ? "-35px" : "35px";
-        return '<span style="position: absolute !important; bottom: -50px; left: ' + px + '; color: #000 !important;">' + value + '</span>';
+        return '<span id="videoSliderTime" style="position: absolute !important; bottom: -50px; left: ' + px + '; color: #000 !important;">' + value + '</span>';
     }
 
     loadPlayer(videoId: any): void {
@@ -251,6 +262,17 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         });
     }
 
+    handleSliderChange(e: Event, newValue: number | number[]): void {
+
+        let v = newValue as number[];
+
+        this.sliderMoved(v[0], v[1]);
+
+        this.setState({
+            sliderValues: v
+        });
+    }
+
     render() {
         let playlistVideoHtml: JSX.Element[] = [];
         if (this.state.selectedPlaylist !== undefined) {
@@ -259,7 +281,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                     <Card key={video.Id} variant="outlined" style={{ margin: '12px', padding: '0 !important' }}>
                         <CardContent key={video.Id} style={{ paddingBottom: '0 !important' }}>
                             <div key={video.Id} style={{ display: 'flex', flexWrap: 'wrap' }}>
-                            <img src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px" }} />
+                            <img src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", paddingBottom: '12px' }} />
 
                                 <div style={{ alignSelf: 'center' }} key={video.Id}>
                                 <Button variant="contained" color="primary" onClick={() => { this.selectVideo(video) }} style={{ "marginRight": "12px" }}>
@@ -308,7 +330,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                         </div>
                         <div>
                             <h1>Video Loop Tool</h1>
-                            <div style={{ display: 'flex' }}>
+                            <div style={{ display: 'flex', marginBottom: '12px' }}>
                                 <Button variant="contained" color="primary" onClick={() => { this.startLoop() }} style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
                                     Setup
                                 </Button>
@@ -317,8 +339,16 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                             <div style={{ display: 'block' }}>
                                 <div id="player"></div>
                             </div>
-                            <div style={{ display: 'block' }}>
-
+                            <div style={{ display: 'block', marginTop: '36px' }}>
+                                <VideoSlider
+                                    value={this.state.sliderValues}
+                                    valueLabelFormat={(v) => v + 's'}
+                                    onChange={(e: Event, newValue: number | number[]) => this.handleSliderChange(e, newValue)}
+                                    valueLabelDisplay="auto"
+                                    min={0}
+                                    max={this.player ? parseInt(this.player.getDuration()) : 0}
+                                    className={"videoSlider"}
+                                />
                             </div>
                             <div style={{ display: 'block' }}>
                                 <div id="slider-range" style={{ width: "640px", margin: '12px auto' }}></div>

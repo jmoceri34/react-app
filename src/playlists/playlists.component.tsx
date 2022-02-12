@@ -1,8 +1,9 @@
-import { Button, Card, CardContent, MenuItem, Select, TextField } from "@material-ui/core";
 import { Component } from "react";
 import { Playlist } from "./playlist.model";
 import { Prompt } from "react-router";
 import * as H from 'history';
+import { Video } from "./video.model";
+import { Button, Card, CardContent, MenuItem, Select, TextField } from "@mui/material";
 
 require('jquery-ui/ui/widgets/slider');
 
@@ -38,10 +39,24 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
         };
     }
 
+    componentDidMount() {
+        window.onbeforeunload = () => {
+
+            // save on page refresh
+            this.saveChanges();
+
+            return '';
+        };
+    }
+
+    componentWillUnmount() {
+        window.onbeforeunload = null;
+    }
+
     addPlaylist(): void {
 
         let playlist = {
-            Id: this.state.playlists.length + 1,
+            Id: this.state.playlists.length > 0 ? Math.max.apply(Math, this.state.playlists.map((p) => { return p.Id })) + 1 : 1,
             Name: '',
             Videos: []
         };
@@ -52,7 +67,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
 
         this.setState({
             playlists: newPlaylists,
-            selectedPlaylist: playlist.Id - 1 // move to the new playlist
+            selectedPlaylist: newPlaylists.length - 1 // move to the new playlist
         });
     }
 
@@ -76,7 +91,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
         let selectedPlaylist = newPlaylists.filter((p) => p.Id === playlistId)[0];
 
         selectedPlaylist.Videos.push({
-            Id: selectedPlaylist.Videos.length + 1,
+            Id: selectedPlaylist.Videos.length > 0 ? Math.max.apply(Math, selectedPlaylist.Videos.map((v) => { return v.Id })) + 1 : 1,
             Name: '',
             VideoId: '',
             StartTime: 0,
@@ -142,6 +157,16 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
         return true;
     }
 
+    nameof<T>(obj: T, expression: Function): string {
+        const res: any = {};
+
+        Object.keys(obj).map(k => res[k] = () => k);
+
+        let result = expression(res)();
+
+        return result;
+    }
+
     render() {
 
         let element: JSX.Element | undefined = undefined;
@@ -154,7 +179,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                     <CardContent style={{ padding: '0 !important' }}>
                         <div>
                             {/*<p><strong>Playlist #{playlistIndex + 1}</strong></p>*/}
-                            <TextField id="standard-basic" label="Playlist Name" defaultValue={playlist?.Name} onChange={e => this.handlePlaylistChange(e, playlistIndex, "Name")} style={{ width: "400px", "marginRight": "12px" }} />
+                            <TextField id="standard-basic" label="Playlist Name" defaultValue={playlist?.Name} onChange={e => this.handlePlaylistChange(e, playlistIndex, this.nameof(playlist, (p: Playlist) => p.Name))} style={{ width: "400px", "marginRight": "12px" }} />
                             <Button variant="contained" color="primary" onClick={() => { this.addVideo(playlist.Id) }} style={{ 'marginTop': "12px", "marginRight": '12px' }}>
                                 Add Video
                             </Button>
@@ -164,15 +189,15 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                             {
                                 playlist.Videos.map((video, videoIndex) => {
                                     return (
-                                        <Card variant="outlined" style={{ "margin": "12px" }} key={video.Id}>
+                                        <Card className="changeColor" variant="outlined" style={{ "margin": "12px" }} key={video.Id}>
                                             <CardContent>
                                                 <div style={{display: 'flex', flexWrap: 'wrap' }}>
                                                     {/*<p><strong>Playlist #{playlistIndex + 1} Video #{videoIndex + 1}</strong></p>*/}
-                                                    <img src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", marginBottom: '12px'}} />
-                                                    <TextField id="standard-basic" label="Video Name" defaultValue={video.Name} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "Name")} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
-                                                    <TextField id="standard-basic" label="Video VideoId" defaultValue={video.VideoId} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "VideoId")} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
-                                                    <TextField id="standard-basic" label="Video StartTime" defaultValue={video.StartTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "StartTime")} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
-                                                    <TextField id="standard-basic" label="Video EndTime" defaultValue={video.EndTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, "EndTime")} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                    <img src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", marginBottom: '12px' }} />
+                                                    <TextField id="standard-basic" label="Video Name" defaultValue={video.Name} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.Name))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                    <TextField id="standard-basic" label="Video VideoId" defaultValue={video.VideoId} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.VideoId))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                    <TextField id="standard-basic" label="Video StartTime" defaultValue={video.StartTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.StartTime))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                    <TextField id="standard-basic" label="Video EndTime" defaultValue={video.EndTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) =>  v.EndTime))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
                                                     <div style={{ alignSelf: 'center' }}>
                                                         <Button variant="contained" color="secondary" onClick={() => { this.removeVideo(playlist.Id, video.Id) }}>
                                                             Remove Video
@@ -233,6 +258,5 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
         );
     };
 };
-
 
 export default Playlists;

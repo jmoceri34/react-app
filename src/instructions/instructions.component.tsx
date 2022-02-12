@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@material-ui/core';
+import { Card, CardContent } from '@mui/material';
 import { Component } from 'react';
 require('jquery-ui/ui/widgets/slider');
 
