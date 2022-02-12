@@ -20,7 +20,7 @@ export default class Instructions extends Component<InstructionsProps, Instructi
         return (
                 <Card variant="outlined" style={{ margin: '12px', padding: '0 !important' }}>
                     <CardContent style={{ padding: '0 !important' }}>
-                        <div style={{ 'textAlign': "left", 'width': '640px' }}>
+                        <div style={{ 'textAlign': "left" }}>
                             <div style={{ display: 'block', 'textAlign': 'left' }}>
                                 <div>
                                 <h2>Instructions</h2>
@@ -59,8 +59,8 @@ export default class Instructions extends Component<InstructionsProps, Instructi
                                         You can also grab the video id and put it into the field above. Run setup first when changing the video id, then hit play on the youtube video. You can change the range on the slider below to loop a specific part of the video. Then hit play.
                                     </p>
                                     <hr />
-                                    <h2>How to gif below</h2>
-                                    <img src={process.env.PUBLIC_URL + '/video-loop-tool-how-to-gif.gif'} />
+                                <h2>How to gif below</h2>
+                                    <img style={{maxWidth: '100%'}} src={process.env.PUBLIC_URL + '/video-loop-tool-how-to-gif.gif'} />
                                 </div>
                             </div>
                         </div>

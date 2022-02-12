@@ -5,6 +5,7 @@ import { Video } from '../playlists/video.model';
 import Slider from '@mui/material/Slider';
 import { Button, Card, CardContent, MenuItem, Select, styled, TextField } from '@mui/material';
 import DOMPurify from 'dompurify';
+import './video-loop-tool.css';
 require('jquery-ui/ui/widgets/slider');
 
 export interface VideoLoopToolProps {
@@ -218,7 +219,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                 mute: 0
             },
             height: 360,
-            width: 640,
+            width: '100%',
             videoId: videoId,
             events: {
                 'onReady': (e: any) => {
@@ -317,10 +318,10 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
         return (
             <Card variant="outlined" style={{ margin: '12px', padding: '0 !important', 'minHeight': '750px' }}>
-                    <CardContent style={{ padding: '0 !important' }}>
-                    <div style={{ 'textAlign': "left", 'margin': '0 auto', display: 'flex' }}>
+                <CardContent style={{ padding: '0 !important' }}>
+                    <div style={{ 'textAlign': "left", 'margin': '0 auto', display: 'flex' }} className="outerContainer">
                         <div>
-                            <div style={{ display: 'block', 'textAlign': 'left', paddingRight: '36px' }}>
+                            <div style={{ display: 'block', 'textAlign': 'left' }}>
                                 <div>
                                     <h1>Playlists</h1>
                                     <Select
@@ -347,7 +348,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                 </div>
                             </div>
                         </div>
-                        <div>
+                        <div style={{ width: '100%', marginLeft: '42px', marginRight: '64px'}}>
                             <h1>Video Loop Tool</h1>
                             <div style={{ display: 'flex', marginBottom: '12px' }}>
                                 <Button variant="contained" color="primary" onClick={() => { this.startLoop() }} style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
@@ -355,19 +356,21 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                 </Button>
                                 <TextField id="standard-basic" label="YouTube VideoID" value={this.state ? this.state.videoId || '' : ''} style={{ width: "200px" }} onChange={e => this.handleChange(e)} />
                             </div>
-                            <div style={{ display: 'block' }}>
-                                <div id="player"></div>
-                            </div>
-                            <div style={{ display: 'block', marginTop: '36px' }}>
-                                <VideoSlider
-                                    value={this.state.sliderValues}
-                                    valueLabelFormat={(v) => v + 's'}
-                                    onChange={(e: Event, newValue: number | number[]) => this.handleSliderChange(e, newValue)}
-                                    valueLabelDisplay="auto"
-                                    min={0}
-                                    max={this.player ? parseInt(this.player.getDuration()) : 0}
-                                    className={"videoSlider"}
-                                />
+                            <div className="auto-resizable-iframe">
+                                <div>
+                                    <div id="player"></div>
+                                </div>
+                                <div style={{ display: 'flex', marginTop: '36px', maxWidth: '100%' }}>
+                                    <VideoSlider
+                                        value={this.state.sliderValues}
+                                        valueLabelFormat={(v) => v + 's'}
+                                        onChange={(e: Event, newValue: number | number[]) => this.handleSliderChange(e, newValue)}
+                                        valueLabelDisplay="auto"
+                                        min={0}
+                                        max={this.player ? parseInt(this.player.getDuration()) : 0}
+                                        className={"videoSlider"}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
