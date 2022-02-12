@@ -14,14 +14,14 @@ const Instructions = lazy(() => import('instructions/instructions.component'));
 
 function App() {
     return (
-        <BrowserRouter>
+        <BrowserRouter basename="/video-loop-tool">
             <Suspense fallback={<div>Loading...</div>}>
                 <div>
                     {/* Nav bar */}
                     <Card style={{margin: '12px', padding: '0 !important'}}>
                         <CardContent style={{ 'padding': '0 !important' }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                                <Link to="/video-loop-tool" style={{ textDecoration: 'none' }}>
+                                <Link to="/" style={{ textDecoration: 'none' }}>
                                     <Button variant="contained" color="primary" style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
                                         Video Loop Tool
                                     </Button>
@@ -47,11 +47,11 @@ function App() {
 
                     {/* Routes */}
                     <Switch>
-                        <Route path="/video-loop-tool" component={VideoLoopTool}>
+                        <Route exact path="/" component={VideoLoopTool}>
                         </Route>
-                        <Route path="/playlists" component={Playlists}>
+                        <Route exact path="/playlists" component={Playlists}>
                         </Route>
-                        <Route path="/instructions" component={Instructions}>
+                        <Route exact path="/instructions" component={Instructions}>
                         </Route>
                     </Switch>
                 </div>

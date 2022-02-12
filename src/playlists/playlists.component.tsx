@@ -77,7 +77,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
 
         let playlist = this.state.playlists[this.state.selectedPlaylist!];
 
-        // if  you're on the playlist, remove the state and show empty
+        // if you're on the playlist, remove the state and show empty
         let removeState = playlist.Id === playlistId;
 
         this.setState({
@@ -234,7 +234,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                             renderValue={this.state.selectedPlaylist !== undefined ? () => this.state.playlists[this.state.selectedPlaylist!].Name : () => 'Playlists'}
                             defaultValue="Playlists"
                             onChange={e => this.handlePlaylistDropdownChange(e)}
-                            style={{ marginRight: '24px', 'minWidth': '200px' }}
+                            style={{ marginRight: '24px', 'minWidth': '200px', marginBottom: '12px' }}
                         >
                             {
                                 this.state.playlists.map((playlist, playlistIndex) => {
