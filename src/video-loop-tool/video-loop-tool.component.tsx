@@ -22,6 +22,12 @@ const VideoSlider = styled(Slider)(({ theme }) => ({
         height: 36,
         width: 36,
     },
+    '& .MuiSlider-rail': {
+        height: 12, 
+    },
+    '& .MuiSlider-track': {
+        height: 14,
+    },
 }));
 
 export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLoopToolState> {
@@ -186,7 +192,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
             value = new Date(value * 1000).toISOString().substr(11, 8);
         }
         var px = left ? "-35px" : "35px";
-        return '<span id="videoSliderTime" style="position: absolute !important; bottom: -50px; left: ' + px + '; color: #000 !important;">' + value + '</span>';
+        return '<span id="videoSliderTime" style="color: #000 !important; font-family: Roboto, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; position: absolute !important; bottom: -50px; left: ' + px + ';">' + value + '</span>';
     }
 
     loadPlayer(videoId: any): void {
