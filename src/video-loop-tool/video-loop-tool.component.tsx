@@ -1,9 +1,10 @@
-import $ from 'jquery';
+import $, { isNumeric } from 'jquery';
 import { Component } from 'react';
 import { Playlist } from '../playlists/playlist.model';
 import { Video } from '../playlists/video.model';
 import Slider from '@mui/material/Slider';
 import { Button, Card, CardContent, MenuItem, Select, styled, TextField } from '@mui/material';
+import DOMPurify from 'dompurify';
 require('jquery-ui/ui/widgets/slider');
 
 export interface VideoLoopToolProps {
@@ -70,6 +71,14 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
         this.queryStartTime = this.urlParameters.get("s");
         this.queryEndTime = this.urlParameters.get("e");
+
+        if (!isNumeric(this.queryStartTime)) {
+            this.queryStartTime = 0;
+        }
+
+        if (!isNumeric(this.queryEndTime)) {
+            this.queryEndTime = 0;
+        }
 
         if (this.state && this.state.videoId) {
             this.startLoop();
@@ -190,12 +199,13 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         }
     }
 
-    wrap(value: any, format: boolean, left: boolean): string {
+    wrap(value: number, format: boolean, left: boolean): string {
+        let result: string = value.toString();
         if (format) {
-            value = new Date(value * 1000).toISOString().substr(11, 8);
+            result = new Date(value * 1000).toISOString().substr(11, 8);
         }
         var px = left ? "-35px" : "35px";
-        return '<span id="videoSliderTime" style="color: #000 !important; font-family: Roboto, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; position: absolute !important; bottom: -50px; left: ' + px + ';">' + value + '</span>';
+        return DOMPurify.sanitize('<span id="videoSliderTime" style="color: #000 !important; font-family: Roboto, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; position: absolute !important; bottom: -50px; left: ' + px + ';">' + result + '</span>');
     }
 
     loadPlayer(videoId: any): void {
@@ -358,9 +368,6 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                     max={this.player ? parseInt(this.player.getDuration()) : 0}
                                     className={"videoSlider"}
                                 />
-                            </div>
-                            <div style={{ display: 'block' }}>
-                                <div id="slider-range" style={{ width: "640px", margin: '12px auto' }}></div>
                             </div>
                         </div>
                     </div>
