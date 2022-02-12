@@ -143,6 +143,9 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
             newRightHandle.children("#videoSliderTime").remove();
         }
 
+        min = min < 0 ? 0 : min;
+        max = max > this.player.getDuration() ? this.player.getDuration() : max;
+
         this.leftHandle = newLeftHandle.prepend(this.wrap(min, true, true));
         this.rightHandle = newRightHandle.prepend(this.wrap(max, true, false));
 
