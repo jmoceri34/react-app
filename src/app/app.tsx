@@ -6,7 +6,7 @@ import {
     BrowserRouter,
     Switch
 } from "react-router-dom";
-import { Button, Card, CardContent } from '@material-ui/core';
+import { Button, Card, CardContent } from '@mui/material';
 
 const VideoLoopTool = lazy(() => import('video-loop-tool/video-loop-tool.component'));
 const Playlists = lazy(() => import('playlists/playlists.component'));
@@ -20,7 +20,7 @@ function App() {
                     {/* Nav bar */}
                     <Card style={{margin: '12px', padding: '0 !important'}}>
                         <CardContent style={{ 'padding': '0 !important' }}>
-                            <div style={{ display: 'flex' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                                 <Link to="/video-loop-tool" style={{ textDecoration: 'none' }}>
                                     <Button variant="contained" color="primary" style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
                                         Video Loop Tool
