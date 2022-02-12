@@ -133,7 +133,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
         let newSlider = $(".videoSlider")[0] as any;
         let newLeftHandle = $(newSlider.children[newSlider.children.length - 2]);
-        let newRightHandle = $(newSlider.children[newSlider.children.length -1]);
+        let newRightHandle = $(newSlider.children[newSlider.children.length - 1]);
 
         if (newLeftHandle.children("#videoSliderTime").length > 0) {
             newLeftHandle.children("#videoSliderTime").remove();
@@ -142,6 +142,9 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         if (newRightHandle.children("#videoSliderTime").length > 0) {
             newRightHandle.children("#videoSliderTime").remove();
         }
+
+        min = min < 0 ? 0 : min;
+        max = max > this.player.getDuration() ? this.player.getDuration() : max;
 
         this.leftHandle = newLeftHandle.prepend(this.wrap(min, true, true));
         this.rightHandle = newRightHandle.prepend(this.wrap(max, true, false));
@@ -167,13 +170,13 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         this.rightValue = endTime;
 
         if (this.leftHandle) {
-            this.leftHandle[0].children[0].innerHTML = new Date(this.leftValue * 1000).toISOString().substr(11, 8);
+            this.leftHandle[0].children[0].textContent = new Date(this.leftValue * 1000).toISOString().substr(11, 8);
             // update the query string parameter
             this.urlParameters.set("s", this.leftValue);
         }
 
         if (this.rightHandle) {
-            this.rightHandle[0].children[0].innerHTML = new Date(this.rightValue * 1000).toISOString().substr(11, 8);
+            this.rightHandle[0].children[0].textContent = new Date(this.rightValue * 1000).toISOString().substr(11, 8);
             // update the query string parameter
             this.urlParameters.set("e", this.rightValue);
         }
