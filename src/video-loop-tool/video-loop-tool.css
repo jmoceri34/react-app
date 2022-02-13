@@ -4,10 +4,9 @@
     padding-bottom: 64px;
 }
 
-.auto-resizable-iframe > div {
+.playerWrapper {
     position: relative;
     padding-bottom: 75%;
-    height: 0px;
 }
 
 .auto-resizable-iframe iframe {
@@ -21,5 +20,9 @@
 @media (max-width: 670px) {
     .outerContainer {
         flex-wrap: wrap-reverse
+    }
+
+    .playlistsContainer {
+        width: 100%;
     }
 }

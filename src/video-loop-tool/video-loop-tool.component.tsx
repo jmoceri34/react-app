@@ -3,7 +3,7 @@ import { Component } from 'react';
 import { Playlist } from '../playlists/playlist.model';
 import { Video } from '../playlists/video.model';
 import Slider from '@mui/material/Slider';
-import { Button, Card, CardContent, MenuItem, Select, styled, TextField } from '@mui/material';
+import { Button, Card, CardContent, MenuItem, Paper, Select, styled, TextField } from '@mui/material';
 import DOMPurify from 'dompurify';
 import './video-loop-tool.css';
 
@@ -204,7 +204,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         if (format) {
             result = new Date(value * 1000).toISOString().substr(11, 8);
         }
-        var px = left ? "-35px" : "35px";
+        var px = left ? "-13px" : "57px";
         return DOMPurify.sanitize('<span id="videoSliderTime" style="color: #000 !important; font-family: Roboto, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; position: absolute !important; bottom: -50px; left: ' + px + ';">' + result + '</span>');
     }
 
@@ -316,10 +316,10 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         }
 
         return (
-            <Card variant="outlined" style={{ margin: '12px', padding: '0 !important', 'minHeight': '750px' }}>
+            <Card variant="outlined" style={{ margin: '12px', padding: '0 !important', 'minHeight': '950px' }}>
                 <CardContent style={{ padding: '0 !important' }}>
                     <div style={{ 'textAlign': "left", 'margin': '0 auto', display: 'flex' }} className="outerContainer">
-                        <div>
+                        <div className="playlistsContainer">
                             <div style={{ display: 'block', 'textAlign': 'left' }}>
                                 <div>
                                     <h1>Playlists</h1>
@@ -339,15 +339,17 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                             })
                                         }
                                     </Select>
+                                    <Paper style={{ maxHeight: '500px', overflow: 'auto', marginTop: '12px' }}>
                                     {
                                         playlistVideoHtml.map(element => {
                                             return element;
                                         })
                                     }
+                                    </Paper>
                                 </div>
                             </div>
                         </div>
-                        <div style={{ width: '100%', marginLeft: '42px', marginRight: '64px'}}>
+                        <div style={{ width: '100%', marginLeft: '42px', marginRight: '96px'}}>
                             <h1>Video Loop Tool</h1>
                             <div style={{ display: 'flex', marginBottom: '12px' }}>
                                 <Button variant="contained" color="primary" onClick={() => { this.startLoop() }} style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
@@ -356,7 +358,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                 <TextField id="standard-basic" label="YouTube VideoID" value={this.state ? this.state.videoId || '' : ''} style={{ width: "200px" }} onChange={e => this.handleChange(e)} />
                             </div>
                             <div className="auto-resizable-iframe">
-                                <div>
+                                <div className="playerWrapper">
                                     <div id="player"></div>
                                 </div>
                                 <div style={{ display: 'flex', marginTop: '36px', maxWidth: '100%' }}>
