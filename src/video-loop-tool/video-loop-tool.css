@@ -1,5 +1,7 @@
 .auto-resizable-iframe {
     max-width: 640px;
+    height: 390px;
+    padding-bottom: 64px;
 }
 
 .auto-resizable-iframe > div {
