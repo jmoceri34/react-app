@@ -1,9 +1,11 @@
-import { Component } from "react";
+﻿import { Component } from "react";
 import { Playlist } from "./playlist.model";
 import { Prompt } from "react-router";
 import * as H from 'history';
 import { Video } from "./video.model";
-import { Button, Card, CardContent, MenuItem, Select, TextField } from "@mui/material";
+import { Button, Card, CardContent, MenuItem, Paper, Select, TextField } from "@mui/material";
+import { DragDropContext, Draggable, DraggingStyle, DragStart, DragUpdate, Droppable, DropResult, ResponderProvided } from "react-beautiful-dnd";
+import DragHandleIcon from '@mui/icons-material/DragHandle';
 
 require('jquery-ui/ui/widgets/slider');
 
@@ -13,6 +15,8 @@ export interface PlaylistProps {
 export interface PlaylistState {
     playlists: Playlist[];
     selectedPlaylist: number | undefined;
+    isDragging: boolean;
+    currentDraggableIndex: number | undefined;
 }
 
 class Playlists extends Component<PlaylistProps, PlaylistState> {
@@ -26,6 +30,10 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
 
         let playlists = storedPlaylists !== null ? JSON.parse(storedPlaylists) : [];
 
+        if (playlists.length == 0) {
+            playlists = JSON.parse("[{\"Id\":1,\"Name\":\"AC⚡DC Fingerbreaker I\",\"Videos\":[{\"Id\":1,\"Name\":\"Jailbreak\",\"VideoId\":\"HRo2m6RYJpI\",\"StartTime\":\"20\",\"EndTime\":\"53\",\"Delay\":0},{\"Id\":2,\"Name\":\"Soul Stripper\",\"VideoId\":\"Sn6bfNFUSU0\",\"StartTime\":0,\"EndTime\":\"155\",\"Delay\":0},{\"Id\":3,\"Name\":\"Live Wire\",\"VideoId\":\"1gtLgAYCf5Y\",\"StartTime\":0,\"EndTime\":\"95\",\"Delay\":0},{\"Id\":4,\"Name\":\"Let There Be Rock\",\"VideoId\":\"OvJrJcVAQQs\",\"StartTime\":0,\"EndTime\":\"63\",\"Delay\":0},{\"Id\":5,\"Name\":\"Who Made Who\",\"VideoId\":\"PiZHNw1MtzI\",\"StartTime\":0,\"EndTime\":\"205\",\"Delay\":0},{\"Id\":6,\"Name\":\"Thunderstruck\",\"VideoId\":\"v2AC41dglnM\",\"StartTime\":\"36\",\"EndTime\":\"192\",\"Delay\":0},{\"Id\":7,\"Name\":\"Dirty Deeds Done Dirt Cheap\",\"VideoId\":\"UIE4UjBtx-o\",\"StartTime\":0,\"EndTime\":\"60\",\"Delay\":0},{\"Id\":8,\"Name\":\"Heatseeker\",\"VideoId\":\"VWG4-4Y6Z60\",\"StartTime\":0,\"EndTime\":\"75\",\"Delay\":0},{\"Id\":9,\"Name\":\"War Machine\",\"VideoId\":\"0W2kXsQ5ZYc\",\"StartTime\":0,\"EndTime\":\"53\",\"Delay\":0},{\"Id\":10,\"Name\":\"Riff Raff\",\"VideoId\":\"7S69xWkV4uM\",\"StartTime\":\"44\",\"EndTime\":\"121\",\"Delay\":0},{\"Id\":11,\"Name\":\"Shot Down In Flames\",\"VideoId\":\"UKwVvSleM6w\",\"StartTime\":\"15\",\"EndTime\":\"52\",\"Delay\":0},{\"Id\":12,\"Name\":\"If You Want Blood(You've Got It)\",\"VideoId\":\"6EWqTym2cQU\",\"StartTime\":\"35\",\"EndTime\":\"70\",\"Delay\":0},{\"Id\":13,\"Name\":\"Shoot To Thrill\",\"VideoId\":\"LIzPbnIp2QM\",\"StartTime\":\"12\",\"EndTime\":\"83\",\"Delay\":0},{\"Id\":14,\"Name\":\"Chase The Ace\",\"VideoId\":\"oYw-ZTLqIpg\",\"StartTime\":0,\"EndTime\":\"181\",\"Delay\":0}]}]");
+        }
+
         let selectedPlaylist = undefined;
 
         // show the first playlist if there are any
@@ -35,7 +43,9 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
 
         this.state = {
             playlists: playlists,
-            selectedPlaylist: selectedPlaylist
+            selectedPlaylist: selectedPlaylist,
+            isDragging: false,
+            currentDraggableIndex: undefined
         };
     }
 
@@ -95,7 +105,8 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
             Name: '',
             VideoId: '',
             StartTime: 0,
-            EndTime: 0
+            EndTime: 0,
+            Delay: 0
         });
 
         this.setState({
@@ -167,6 +178,84 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
         return result;
     }
 
+    onDragStart(initial: DragStart, provided: ResponderProvided): void {
+        this.setState({
+            isDragging: true,
+            currentDraggableIndex: initial.source.index
+        });
+    }
+
+    onDragUpdate(initial: DragUpdate, provided: ResponderProvided): void {
+        if (!initial.destination) {
+            return;
+        }
+
+        this.setState({
+            currentDraggableIndex: initial.destination!.index
+        });
+    }
+
+    onDragEnd(result: DropResult, provided: ResponderProvided): void {
+        let playlists = [...this.state.playlists];
+
+        // dropped outside the list
+        if (result.destination) {
+            const videos = this.reorder(
+                this.state.playlists[this.state.selectedPlaylist!].Videos,
+                result.source.index,
+                result.destination.index
+            );
+
+
+            playlists[this.state.selectedPlaylist!].Videos = videos;
+        }
+
+
+        this.setState({
+            playlists: playlists,
+            isDragging: false,
+        });
+    }
+
+
+    reorder(list: any[], startIndex: number, endIndex: number) {
+        const result = Array.from(list);
+        const [removed] = result.splice(startIndex, 1);
+        result.splice(endIndex, 0, removed);
+
+        return result;
+    };
+
+    getItemStyle(isDragging: boolean, draggableStyle: any) {
+        return {
+            // some basic styles to make the items look a bit nicer
+            userSelect: "none",
+            height: 45,
+            marginRight: 12,
+
+            // change background colour if dragging
+            background: isDragging ? "lightgreen" : "white",
+
+            // styles we need to apply on draggables
+            ...draggableStyle
+        };
+    }
+
+    getItems(count: number) {
+        return Array.from({ length: count }, (v, k) => k).map(k => ({
+            id: `item-${k}`,
+            content: `item ${k}`
+        }));
+    }
+
+    getListStyle(isDraggingOver: boolean) {
+        return {
+            background: isDraggingOver ? "lightblue" : "lightgrey",
+            padding: 8,
+            width: 250
+        };
+    }
+
     render() {
 
         let element: JSX.Element | undefined = undefined;
@@ -186,29 +275,62 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                             <Button variant="contained" color="secondary" onClick={() => { this.removePlaylist(playlist.Id) }} style={{ 'marginTop': "12px" }}>
                                 Remove Playlist
                             </Button>
-                            {
-                                playlist.Videos.map((video, videoIndex) => {
-                                    return (
-                                        <Card className="changeColor" variant="outlined" style={{ "margin": "12px" }} key={video.Id}>
-                                            <CardContent>
-                                                <div style={{display: 'flex', flexWrap: 'wrap' }}>
-                                                    {/*<p><strong>Playlist #{playlistIndex + 1} Video #{videoIndex + 1}</strong></p>*/}
-                                                    <img src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", marginBottom: '12px' }} />
-                                                    <TextField id="standard-basic" label="Video Name" defaultValue={video.Name} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.Name))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
-                                                    <TextField id="standard-basic" label="Video VideoId" defaultValue={video.VideoId} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.VideoId))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
-                                                    <TextField type="number" inputProps={{ min: 0, inputMode: 'numeric', pattern: '[0-9]*' }} id="standard-basic" label="Video StartTime" defaultValue={video.StartTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.StartTime))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
-                                                    <TextField type="number" inputProps={{ min: 0, inputMode: 'numeric', pattern: '[0-9]*' }} id="standard-basic" label="Video EndTime" defaultValue={video.EndTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) =>  v.EndTime))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
-                                                    <div style={{ alignSelf: 'center' }}>
-                                                        <Button variant="contained" color="secondary" onClick={() => { this.removeVideo(playlist.Id, video.Id) }}>
-                                                            Remove Video
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    );
-                                })
-                            }
+                            <DragDropContext
+                                onDragStart={(initial: DragStart, provided: ResponderProvided) => this.onDragStart(initial, provided)}
+                                onDragUpdate={(initial: DragUpdate, provided: ResponderProvided) => this.onDragUpdate(initial, provided)}
+                                onDragEnd={(result: DropResult, provided: ResponderProvided) => this.onDragEnd(result, provided)}>
+                                <Droppable droppableId="droppable">
+                                    {(provided, snapshot) => (
+                                        <div {...provided.droppableProps} ref={provided.innerRef}>
+                                            {
+                                                playlist.Videos.map((video, videoIndex) => {
+                                                    return (
+                                                        <Card className="changeColor" variant="outlined" style={{ "margin": "12px", background: this.state.isDragging ? (this.state.currentDraggableIndex == videoIndex ? '#ccc' : '#333') : '#fff' }} key={video.Id}>
+                                                            <CardContent>
+                                                                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                                                                    <Draggable key={video.Id} draggableId={video.Id.toString()} index={videoIndex}>
+                                                                        {(provided, snapshot) => {
+                                                                            return (
+                                                                                <div
+                                                                                    ref={provided.innerRef}
+                                                                                    {...provided.draggableProps}
+                                                                                    {...provided.dragHandleProps}
+                                                                                    style={this.getItemStyle(
+                                                                                        snapshot.isDragging,
+                                                                                        provided.draggableProps.style
+                                                                                    )}
+                                                                                >
+                                                                                    <Paper>
+                                                                                        <DragHandleIcon color="primary" style={{ height: '45px' }} />
+                                                                                    </Paper>
+                                                                                </div>
+                                                                            );
+                                                                        }
+                                                                        }
+
+                                                                    </Draggable>
+                                                                    <img src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", marginBottom: '12px' }} />
+                                                                    <TextField id="standard-basic" label="Video Name" defaultValue={video.Name} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.Name))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                                    <TextField id="standard-basic" label="Video VideoId" defaultValue={video.VideoId} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.VideoId))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                                    <TextField type="number" inputProps={{ min: 0, inputMode: 'numeric', pattern: '[0-9]*' }} id="standard-basic" label="Video StartTime" defaultValue={video.StartTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.StartTime))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                                    <TextField type="number" inputProps={{ min: 0, inputMode: 'numeric', pattern: '[0-9]*' }} id="standard-basic" label="Video EndTime" defaultValue={video.EndTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.EndTime))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                                    <TextField type="number" inputProps={{ min: 0, inputMode: 'numeric', pattern: '[0-9]*' }} id="standard-basic" label="Video Delay" defaultValue={video.Delay} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.Delay))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                                    <div style={{ alignSelf: 'center' }}>
+                                                                        <Button variant="contained" color="secondary" onClick={() => { this.removeVideo(playlist.Id, video.Id) }}>
+                                                                            Remove Video
+                                                                        </Button>
+                                                                    </div>
+                                                                </div>
+                                                            </CardContent>
+                                                        </Card>
+                                                    );
+                                                })
+                                            }
+                                            {provided.placeholder}
+                                        </div>
+                                    )}
+                                </Droppable>
+                            </DragDropContext>
                         </div>
                     </CardContent>
                 </Card>
@@ -234,8 +356,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                             renderValue={this.state.selectedPlaylist !== undefined ? () => this.state.playlists[this.state.selectedPlaylist!].Name : () => 'Playlists'}
                             defaultValue="Playlists"
                             onChange={e => this.handlePlaylistDropdownChange(e)}
-                            style={{ marginRight: '24px', 'minWidth': '200px', marginBottom: '12px' }}
-                        >
+                            style={{ marginRight: '24px', 'minWidth': '200px', marginBottom: '12px' }}>
                             {
                                 this.state.playlists.map((playlist, playlistIndex) => {
                                     return (
