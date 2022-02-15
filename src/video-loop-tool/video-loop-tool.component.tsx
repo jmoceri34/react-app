@@ -3,7 +3,7 @@ import { Component } from 'react';
 import { Playlist } from '../playlists/playlist.model';
 import { Video } from '../playlists/video.model';
 import Slider from '@mui/material/Slider';
-import { Button, Card, CardContent, MenuItem, Paper, Select, styled, TextField } from '@mui/material';
+import { Button, Card, CardContent, Checkbox, FormControlLabel, FormGroup, MenuItem, Paper, Select, styled, TextField } from '@mui/material';
 import DOMPurify from 'dompurify';
 import './video-loop-tool.css';
 
@@ -15,6 +15,7 @@ export interface VideoLoopToolState {
     videoId: string;
     selectedPlaylist: number | undefined;
     sliderValues: number[];
+    playThroughPlaylist: boolean;
 }
 
 
@@ -35,6 +36,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
     state: VideoLoopToolState;
 
+    changingVideo: boolean;
     player: any;
     leftHandle: any;
     rightHandle: any;
@@ -56,7 +58,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
         this.playlists = storedPlaylists !== null ? JSON.parse(storedPlaylists) : [];
 
-        let selectedPlaylist = undefined;
+        let selectedPlaylist : number | undefined = undefined;
 
         // show the first playlist if there are any
         if (this.playlists.length > 0) {
@@ -66,9 +68,11 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         this.state = {
             videoId: this.urlParameters.get("v")!,
             selectedPlaylist: selectedPlaylist,
-            sliderValues: [0, 0]
+            sliderValues: [0, 0],
+            playThroughPlaylist: false,
         }
 
+        this.changingVideo = false;
         this.queryStartTime = this.urlParameters.get("s");
         this.queryEndTime = this.urlParameters.get("e");
 
@@ -81,7 +85,21 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         }
 
         if (this.state && this.state.videoId) {
-            this.startLoop();
+            setTimeout(() => {
+                if (selectedPlaylist !== undefined) {
+                    let video = this.playlists[selectedPlaylist!].Videos.filter(v => v.VideoId == this.state.videoId)[0];
+
+                    if (video !== undefined) {
+                        this.selectVideo(video);
+                    }
+                    else {
+                        this.startLoop();
+                    }
+                }
+                else {
+                    this.startLoop();
+                }
+            }, 1000);
         }
     }
 
@@ -92,8 +110,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         });
     }
 
-    startLoop(): void {
-
+    startLoopInternal(): void {
         // set the query video id
         this.urlParameters.set("v", this.state.videoId);
 
@@ -135,6 +152,27 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         // otherwise load the player
         else {
             this.loadPlayer(this.state.videoId);
+        }
+    }
+
+    startLoop(): void {
+        if (this.state.selectedPlaylist !== undefined) {
+            let video = this.playlists[this.state.selectedPlaylist].Videos.filter(v => v.VideoId == this.state.videoId)[0];
+
+            if (video !== undefined && video.Delay > 0) {
+                if (this.player) {
+                    this.player.stopVideo();
+                }
+                setTimeout(() => {
+                    this.startLoopInternal();
+                }, video.Delay * 1000);
+            }
+            else {
+                this.startLoopInternal();
+            }
+        }
+        else {
+            this.startLoopInternal();
         }
     }
 
@@ -241,8 +279,44 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                         this.loopTimeout = setInterval(() => {
                             var currentTime = this.player.getCurrentTime();
 
-                            if (currentTime >= this.rightValue) {
-                                this.player.seekTo(this.leftValue, true);
+                            if (currentTime >= this.rightValue && this.rightValue !== 0) {
+                                if (this.state.playThroughPlaylist && !this.changingVideo) {
+
+                                    this.changingVideo = true;
+
+                                    let videos = this.playlists[this.state.selectedPlaylist!].Videos;
+                                    let nextVideo: Video | undefined = undefined;
+
+                                    for (let i = 0; i < videos.length; i++) {
+                                        if (videos[i].VideoId == this.state.videoId) {
+                                            if (i == videos.length - 1) {
+                                                nextVideo = videos[0];
+                                            }
+                                            else {
+                                                nextVideo = videos[i + 1];
+                                            }
+
+                                            break;
+                                        }
+                                    }
+
+                                    // found the next video, skip ahead to it
+                                    if (nextVideo !== undefined) {
+                                        this.selectVideo(nextVideo!);
+                                    }
+                                    // video doesn't exist on playlist
+                                    else {
+                                        this.player.seekTo(this.leftValue, true);
+                                    }
+
+                                    setInterval(() => {
+                                        this.changingVideo = false;
+                                    }, 1000);
+                                }
+                                // repeat if it's not checked
+                                else {
+                                    this.player.seekTo(this.leftValue, true);
+                                }
                             }
                         }, 1000);
                     }
@@ -267,6 +341,13 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         this.queryStartTime = video.StartTime;
         this.queryEndTime = video.EndTime;
 
+        let e = document.getElementById('video-' + video.Id);
+
+        e?.scrollIntoView({
+            behavior: "smooth",
+            block: 'center',
+            inline: 'center'
+        });
 
         this.setState({
             videoId: video.VideoId
@@ -292,25 +373,34 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         });
     }
 
+    handlePlayThroughPlaylistChange(e: React.ChangeEvent<HTMLInputElement>, checked: boolean): void {
+        this.setState({
+            playThroughPlaylist: checked
+        });
+    }
+
     render() {
         let playlistVideoHtml: JSX.Element[] = [];
         if (this.state.selectedPlaylist !== undefined) {
             playlistVideoHtml = this.playlists[this.state.selectedPlaylist!].Videos.map((video, videoIndex) => {
                 return (
-                    <Card key={video.Id} variant="outlined" style={{ margin: '12px', padding: '0 !important' }}>
-                        <CardContent key={video.Id} style={{ paddingBottom: '0 !important' }}>
-                            <div key={video.Id} style={{ display: 'flex', flexWrap: 'wrap' }}>
-                            <img src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", paddingBottom: '12px' }} />
+                    <Card key={video.Id} variant="outlined" style={{ margin: '12px', padding: '0 !important', background: video.VideoId === this.state.videoId ? '#ccc' : '#fff' }} id={'video-' + video.Id}>
+                            <CardContent key={video.Id} style={{ paddingBottom: '0 !important' }}>
+                                <div key={video.Id} style={{ display: 'flex', flexWrap: 'wrap' }}>
+                                {video.VideoId === this.state.videoId && (
+                                    <h6 style={{flex: '0 0 100%'}}>Currently playing</h6>
+                                    )}
+                                <img src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", paddingBottom: '12px' }} />
 
-                                <div style={{ alignSelf: 'center' }} key={video.Id}>
-                                <Button variant="contained" color="primary" onClick={() => { this.selectVideo(video) }} style={{ "marginRight": "12px" }}>
-                                    Select
-                                </Button>
+                                    <div style={{ alignSelf: 'center' }} key={video.Id}>
+                                    <Button variant="contained" color="primary" onClick={() => { this.selectVideo(video) }} style={{ "marginRight": "12px" }}>
+                                        Select
+                                    </Button>
+                                </div>
+                                <p>{video.Name} ({video.StartTime}s - {video.EndTime}s)</p>
                             </div>
-                            <p>{video.Name} ({video.StartTime}s - {video.EndTime}s)</p>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
                 );
             });
         }
@@ -329,8 +419,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                         renderValue={this.state.selectedPlaylist !== undefined ? () => this.playlists[this.state.selectedPlaylist!].Name : () => 'Playlists'}
                                         defaultValue="Playlists"
                                         onChange={e => this.handlePlaylistDropdownChange(e)}
-                                        style={{ 'minWidth': '200px'}}
-                                    >
+                                        style={{ 'minWidth': '200px'}}>
                                         {
                                             this.playlists.map((playlist, playlistIndex) => {
                                                 return (
@@ -339,12 +428,15 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                             })
                                         }
                                     </Select>
+                                    <FormGroup>
+                                        <FormControlLabel control={<Checkbox defaultChecked={false} onChange={(e: React.ChangeEvent<HTMLInputElement>, checked: boolean) => this.handlePlayThroughPlaylistChange(e, checked)} />} label="Play through Playlist" />
+                                    </FormGroup>
                                     <Paper style={{ maxHeight: '500px', overflow: 'auto', marginTop: '12px' }}>
-                                    {
-                                        playlistVideoHtml.map(element => {
-                                            return element;
-                                        })
-                                    }
+                                        {
+                                            playlistVideoHtml.map(element => {
+                                                return element;
+                                            })
+                                        }
                                     </Paper>
                                 </div>
                             </div>
