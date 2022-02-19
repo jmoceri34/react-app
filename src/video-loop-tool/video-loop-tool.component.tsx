@@ -37,19 +37,28 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
     state: VideoLoopToolState;
 
     changingVideo: boolean;
-    player: any;
-    leftHandle: any;
-    rightHandle: any;
-    leftValue: any;
-    rightValue: any;
-    loopTimeout: any;
+    player: YT.Player | undefined;
+    startTimeHandle: JQuery<any> | undefined;
+    endTimeHandle: JQuery<any> | undefined;
+
+    startTimeValue: number;
+    endTimeValue: number;
+    sliderMaxValue: number;
+
+    loopTimeout: NodeJS.Timer | undefined;
+
     urlParameters: URLSearchParams;
-    queryStartTime: any;
-    queryEndTime: any;
+    queryStartTime: string | null;
+    queryEndTime: string | null;
+
     playlists: Playlist[];
 
     constructor(props: VideoLoopToolProps) {
         super(props);
+
+        this.startTimeValue = 0;
+        this.endTimeValue = 0;
+        this.sliderMaxValue = 0;
 
         // get the query string parameters if any
         this.urlParameters = new URLSearchParams(window.location.search);
@@ -77,11 +86,11 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         this.queryEndTime = this.urlParameters.get("e");
 
         if (!isNumeric(this.queryStartTime)) {
-            this.queryStartTime = 0;
+            this.queryStartTime = '0';
         }
 
         if (!isNumeric(this.queryEndTime)) {
-            this.queryEndTime = 0;
+            this.queryEndTime = '0';
         }
 
         if (this.state && this.state.videoId) {
@@ -116,24 +125,19 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
         // if the player already exists, load the video
         if (this.player) {
-            this.player.loadVideoById(this.state.videoId);
 
+            // clear the timeout
             if (this.loopTimeout) {
                 clearTimeout(this.loopTimeout);
             }
 
-            setTimeout(() => {
-                var duration = this.player.getDuration();
+            // load the new video
+            this.player.loadVideoById(this.state.videoId);
 
-                var left = this.queryStartTime || 0;
-                var right = this.queryEndTime || duration;
+            // setup the player with the new values
+            this.setupVideoPlayer();
 
-                this.createSlider(left, right);
-
-                this.player.seekTo(this.leftValue, true);
-
-            }, 500);
-
+            // return early
             return;
         }
 
@@ -191,49 +195,48 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         }
 
         min = min < 0 ? 0 : min;
-        max = max > this.player.getDuration() ? this.player.getDuration() : max;
 
-        this.leftHandle = newLeftHandle.prepend(this.wrap(min, true, true));
-        this.rightHandle = newRightHandle.prepend(this.wrap(max, true, false));
+        this.startTimeHandle = newLeftHandle.prepend(this.wrap(min, true, true));
+        this.endTimeHandle = newRightHandle.prepend(this.wrap(max, true, false));
 
-        this.leftValue = min;
-        this.rightValue = max;
+        this.startTimeValue = min;
+        this.endTimeValue = max;
 
         // update the query string when creating the slider
-        this.urlParameters.set("s", this.leftValue);
-        this.urlParameters.set("e", this.rightValue);
+        this.urlParameters.set("s", this.startTimeValue.toString());
+        this.urlParameters.set("e", this.endTimeValue.toString());
 
         var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + this.urlParameters.toString();
         window.history.pushState({ path: newurl }, '', newurl);
 
         this.setState({
-            sliderValues: [this.leftValue, this.rightValue]
+            sliderValues: [this.startTimeValue, this.endTimeValue]
         });
     }
 
     sliderMoved(startTime: any, endTime: any): void {
 
-        this.leftValue = startTime;
-        this.rightValue = endTime;
+        this.startTimeValue = startTime;
+        this.endTimeValue = endTime;
 
-        if (this.leftHandle) {
-            this.leftHandle[0].children[0].textContent = new Date(this.leftValue * 1000).toISOString().substr(11, 8);
+        if (this.startTimeHandle) {
+            this.startTimeHandle[0].children[0].textContent = new Date(this.startTimeValue * 1000).toISOString().substr(11, 8);
             // update the query string parameter
-            this.urlParameters.set("s", this.leftValue);
+            this.urlParameters.set("s", this.startTimeValue.toString());
         }
 
-        if (this.rightHandle) {
-            this.rightHandle[0].children[0].textContent = new Date(this.rightValue * 1000).toISOString().substr(11, 8);
+        if (this.endTimeHandle) {
+            this.endTimeHandle[0].children[0].textContent = new Date(this.endTimeValue * 1000).toISOString().substr(11, 8);
             // update the query string parameter
-            this.urlParameters.set("e", this.rightValue);
+            this.urlParameters.set("e", this.endTimeValue.toString());
         }
 
         var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + this.urlParameters.toString();
 
         window.history.pushState({ path: newurl }, '', newurl);
 
-        if (this.player.getCurrentTime() < this.leftValue || this.player.getCurrentTime() > this.rightValue) {
-            this.player.seekTo(this.leftValue, true);
+        if (this.player!.getCurrentTime() < this.startTimeValue || this.player!.getCurrentTime() > this.endTimeValue) {
+            this.player!.seekTo(this.startTimeValue, true);
         }
     }
 
@@ -244,6 +247,27 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         }
         var px = left ? "-13px" : "57px";
         return DOMPurify.sanitize('<span id="videoSliderTime" style="color: #000 !important; font-family: Roboto, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; position: absolute !important; bottom: -50px; left: ' + px + ';">' + result + '</span>');
+    }
+
+    delay(milliseconds: number): Promise<unknown> {
+        const result = new Promise<unknown>(result => setTimeout(result, milliseconds));
+
+        return result;
+    }
+
+    async getDuration(): Promise<number> {
+        if (!this.player) {
+            return await 0;
+        }
+
+        let duration = this.player.getDuration();
+
+        while (!duration || duration === 0) {
+            duration = this.player.getDuration();
+            await this.delay(500);
+        }
+
+        return duration;
     }
 
     loadPlayer(videoId: any): void {
@@ -259,87 +283,120 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
             width: '100%',
             videoId: videoId,
             events: {
-                'onReady': (e: any) => {
-                    var duration = this.player.getDuration();
-
-                    var left = this.queryStartTime || 0;
-                    var right = this.queryEndTime || duration;
-
-                    this.createSlider(left, right);
-
-                    this.player.seekTo(this.leftValue, true);
-                },
-                'onStateChange': (event: any) => {
-                    if (event.data == (window as any).YT.PlayerState.PLAYING) {
-
-                        if (this.player && this.player.getCurrentTime() < this.leftValue) {
-                            this.player.seekTo(this.leftValue, true);
-                        }
-
-                        this.loopTimeout = setInterval(() => {
-                            var currentTime = this.player.getCurrentTime();
-
-                            if (currentTime >= this.rightValue && this.rightValue !== 0) {
-                                if (this.state.playThroughPlaylist && !this.changingVideo) {
-
-                                    this.changingVideo = true;
-
-                                    let videos = this.playlists[this.state.selectedPlaylist!].Videos;
-                                    let nextVideo: Video | undefined = undefined;
-
-                                    for (let i = 0; i < videos.length; i++) {
-                                        if (videos[i].VideoId == this.state.videoId) {
-                                            if (i == videos.length - 1) {
-                                                nextVideo = videos[0];
-                                            }
-                                            else {
-                                                nextVideo = videos[i + 1];
-                                            }
-
-                                            break;
-                                        }
-                                    }
-
-                                    // found the next video, skip ahead to it
-                                    if (nextVideo !== undefined) {
-                                        this.selectVideo(nextVideo!);
-                                    }
-                                    // video doesn't exist on playlist
-                                    else {
-                                        this.player.seekTo(this.leftValue, true);
-                                    }
-
-                                    setInterval(() => {
-                                        this.changingVideo = false;
-                                    }, 1000);
-                                }
-                                // repeat if it's not checked
-                                else {
-                                    this.player.seekTo(this.leftValue, true);
-                                }
-                            }
-                        }, 1000);
-                    }
-                    else if (event.data == (window as any).YT.PlayerState.PAUSED) {
-                        if (this.loopTimeout) {
-                            clearTimeout(this.loopTimeout);
-                        }
-                    }
-                    else if (event.data == (window as any).YT.PlayerState.ENDED) {
-                        if (this.loopTimeout) {
-                            clearTimeout(this.loopTimeout);
-                        }
-
-                        this.player.seekTo(this.leftValue, true);
-                    }
-                }
+                'onReady': (e: any) => this.playerOnReady(e),
+                'onStateChange': (e: any) => this.playerOnStateChange(e)
             }
         });
     }
 
+    playerOnReady(e: any): void {
+        this.setupVideoPlayer();
+    }
+
+    setupVideoPlayer(): void {
+
+        // duration can be accessed when it's playing, mute it first
+        this.player!.mute();
+        // timeout to wait for duration
+        setTimeout(async () => {
+
+            // get the duration
+            var duration = await this.getDuration();
+
+            var left = parseInt(this.queryStartTime!) || 0;
+            var right = parseInt(this.queryEndTime!) || duration;
+
+            this.sliderMaxValue = duration;
+
+            this.createSlider(left, right);
+
+            // unmute it and play at the start time
+            this.player!.unMute();
+
+            this.player!.seekTo(this.startTimeValue, true);
+        });
+    }
+
+    playerOnStateChange(event: any): void {
+        if (event.data == (window as any).YT.PlayerState.PLAYING) {
+
+            if (this.player && this.player.getCurrentTime() < this.startTimeValue) {
+                this.player.seekTo(this.startTimeValue, true);
+            }
+
+            this.loopTimeout = setInterval(() => {
+
+                if (!this.player!.getCurrentTime) {
+                    return;
+                }
+
+                var currentTime = this.player!.getCurrentTime();
+
+                // nothing to check
+                if (currentTime < this.endTimeValue) {
+                    return;
+                }
+
+                if (this.changingVideo) {
+                    return;
+                }
+
+                if (this.state.playThroughPlaylist) {
+
+                    this.changingVideo = true;
+
+                    let videos = this.playlists[this.state.selectedPlaylist!].Videos;
+                    let nextVideo: Video | undefined = undefined;
+
+                    for (let i = 0; i < videos.length; i++) {
+                        if (videos[i].VideoId == this.state.videoId) {
+                            if (i == videos.length - 1) {
+                                nextVideo = videos[0];
+                            }
+                            else {
+                                nextVideo = videos[i + 1];
+                            }
+
+                            break;
+                        }
+                    }
+
+                    // found the next video, skip ahead to it
+                    if (nextVideo !== undefined) {
+                        this.selectVideo(nextVideo!);
+                    }
+                    // video doesn't exist on playlist
+                    else {
+                        this.player!.seekTo(this.startTimeValue, true);
+                    }
+
+                    setTimeout(() => {
+                        this.changingVideo = false;
+                    }, 1000);
+                }
+                // repeat if it's not checked
+                else {
+                    this.player!.seekTo(this.startTimeValue, true);
+                }
+            }, 1000);
+        }
+        else if (event.data == (window as any).YT.PlayerState.PAUSED) {
+            if (this.loopTimeout) {
+                clearTimeout(this.loopTimeout);
+            }
+        }
+        else if (event.data == (window as any).YT.PlayerState.ENDED) {
+            if (this.loopTimeout) {
+                clearTimeout(this.loopTimeout);
+            }
+
+            this.player!.seekTo(this.startTimeValue, true);
+        }
+    }
+
     selectVideo(video: Video): void {
-        this.queryStartTime = video.StartTime;
-        this.queryEndTime = video.EndTime;
+        this.queryStartTime = video.StartTime.toString();
+        this.queryEndTime = video.EndTime.toString();
 
         let e = document.getElementById('video-' + video.Id);
 
@@ -393,7 +450,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                 <img src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", paddingBottom: '12px' }} />
 
                                     <div style={{ alignSelf: 'center' }} key={video.Id}>
-                                    <Button variant="contained" color="primary" onClick={() => { this.selectVideo(video) }} style={{ "marginRight": "12px" }}>
+                                    <Button variant="contained" color="primary" onClick={(e) => { this.selectVideo(video) }} style={{ "marginRight": "12px" }}>
                                         Select
                                     </Button>
                                 </div>
@@ -449,7 +506,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                 </Button>
                                 <TextField id="standard-basic" label="YouTube VideoID" value={this.state ? this.state.videoId || '' : ''} style={{ width: "200px" }} onChange={e => this.handleChange(e)} />
                             </div>
-                            <div className="auto-resizable-iframe">
+                            <div className="auto-resizable-iframe" style={{display: this.player ? 'block' : 'none'}}>
                                 <div className="playerWrapper">
                                     <div id="player"></div>
                                 </div>
@@ -460,10 +517,10 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                         onChange={(e: Event, newValue: number | number[]) => this.handleSliderChange(e, newValue)}
                                         valueLabelDisplay="auto"
                                         min={0}
-                                        max={this.player ? parseInt(this.player.getDuration()) : 0}
+                                        max={this.sliderMaxValue}
                                         className={"videoSlider"}
                                     />
-                                </div>
+                                </div> 
                             </div>
                         </div>
                     </div>
