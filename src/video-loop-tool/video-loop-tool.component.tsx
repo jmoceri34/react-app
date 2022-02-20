@@ -122,7 +122,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
         // on a playlist with a video
         if (this.state.selectedPlaylist !== undefined && this.state.selectedVideoId !== undefined) {
-            let video = this.playlists[this.state.selectedPlaylist].Videos.filter(v => v.Id == this.state.selectedVideoId)[0];
+            let video = this.playlists[this.state.selectedPlaylist].Videos.filter(v => v.Id === this.state.selectedVideoId)[0];
 
             //check for video delays
             if (video.Delay > 0) {
