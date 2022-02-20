@@ -1,10 +1,10 @@
-﻿import { Component } from "react";
+import { Component } from "react";
 import { Playlist } from "./playlist.model";
 import { Prompt } from "react-router";
 import * as H from 'history';
 import { Video } from "./video.model";
 import { Button, Card, CardContent, MenuItem, Paper, Select, TextField } from "@mui/material";
-import { DragDropContext, Draggable, DraggingStyle, DragStart, DragUpdate, Droppable, DropResult, ResponderProvided } from "react-beautiful-dnd";
+import { DragDropContext, Draggable, DragStart, DragUpdate, Droppable, DropResult, ResponderProvided } from "react-beautiful-dnd";
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 
 export interface PlaylistProps {
@@ -26,7 +26,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
 
         let playlists = storedPlaylists !== null ? JSON.parse(storedPlaylists) : [];
 
-        if (playlists.length == 0) {
+        if (playlists.length === 0) {
             playlists = JSON.parse("[{\"Id\":1,\"Name\":\"AC⚡DC Fingerbreaker I\",\"Videos\":[{\"Id\":1,\"Name\":\"Jailbreak\",\"VideoId\":\"HRo2m6RYJpI\",\"StartTime\":\"20\",\"EndTime\":\"53\",\"Delay\":0},{\"Id\":2,\"Name\":\"Soul Stripper\",\"VideoId\":\"Sn6bfNFUSU0\",\"StartTime\":0,\"EndTime\":\"155\",\"Delay\":0},{\"Id\":3,\"Name\":\"Live Wire\",\"VideoId\":\"1gtLgAYCf5Y\",\"StartTime\":0,\"EndTime\":\"95\",\"Delay\":0},{\"Id\":4,\"Name\":\"Let There Be Rock\",\"VideoId\":\"OvJrJcVAQQs\",\"StartTime\":0,\"EndTime\":\"63\",\"Delay\":0},{\"Id\":5,\"Name\":\"Who Made Who\",\"VideoId\":\"PiZHNw1MtzI\",\"StartTime\":0,\"EndTime\":\"205\",\"Delay\":0},{\"Id\":6,\"Name\":\"Thunderstruck\",\"VideoId\":\"v2AC41dglnM\",\"StartTime\":\"36\",\"EndTime\":\"192\",\"Delay\":0},{\"Id\":7,\"Name\":\"Dirty Deeds Done Dirt Cheap\",\"VideoId\":\"UIE4UjBtx-o\",\"StartTime\":0,\"EndTime\":\"60\",\"Delay\":0},{\"Id\":8,\"Name\":\"Heatseeker\",\"VideoId\":\"VWG4-4Y6Z60\",\"StartTime\":0,\"EndTime\":\"75\",\"Delay\":0},{\"Id\":9,\"Name\":\"War Machine\",\"VideoId\":\"0W2kXsQ5ZYc\",\"StartTime\":0,\"EndTime\":\"53\",\"Delay\":0},{\"Id\":10,\"Name\":\"Riff Raff\",\"VideoId\":\"7S69xWkV4uM\",\"StartTime\":\"44\",\"EndTime\":\"121\",\"Delay\":0},{\"Id\":11,\"Name\":\"Shot Down In Flames\",\"VideoId\":\"UKwVvSleM6w\",\"StartTime\":\"15\",\"EndTime\":\"52\",\"Delay\":0},{\"Id\":12,\"Name\":\"If You Want Blood(You've Got It)\",\"VideoId\":\"6EWqTym2cQU\",\"StartTime\":\"35\",\"EndTime\":\"70\",\"Delay\":0},{\"Id\":13,\"Name\":\"Shoot To Thrill\",\"VideoId\":\"LIzPbnIp2QM\",\"StartTime\":\"12\",\"EndTime\":\"83\",\"Delay\":0},{\"Id\":14,\"Name\":\"Chase The Ace\",\"VideoId\":\"oYw-ZTLqIpg\",\"StartTime\":0,\"EndTime\":\"181\",\"Delay\":0}]}]");
         }
 
@@ -255,7 +255,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                                                                                         <Paper style={{ width: '24px', display: 'inline-block', height: '45px', marginRight: '12px' }} {...provided.dragHandleProps}>
                                                                                             <DragHandleIcon color="primary" style={{ height: '45px', maxHeight: '45px' }} />
                                                                                         </Paper>
-                                                                                        <img src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", marginBottom: '12px' }} />
+                                                                                        <img alt={video.Name} src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", marginBottom: '12px' }} />
                                                                                         <TextField id="standard-basic" label="Video Name" defaultValue={video.Name} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.Name))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
                                                                                         <TextField id="standard-basic" label="Video VideoId" defaultValue={video.VideoId} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.VideoId))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
                                                                                         <TextField type="number" inputProps={{ min: 0, inputMode: 'numeric', pattern: '[0-9]*' }} id="standard-basic" label="Video StartTime" defaultValue={video.StartTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.StartTime))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
