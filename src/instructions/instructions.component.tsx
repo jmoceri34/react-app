@@ -1,6 +1,5 @@
 import { Card, CardContent } from '@mui/material';
 import { Component } from 'react';
-require('jquery-ui/ui/widgets/slider');
 
 export interface InstructionsProps {
 
@@ -11,10 +10,6 @@ export interface InstructionsState {
 }
 
 export default class Instructions extends Component<InstructionsProps, InstructionsState> {
-
-    constructor(props: InstructionsProps) {
-        super(props);
-    }
 
     render() {
         return (
@@ -60,7 +55,7 @@ export default class Instructions extends Component<InstructionsProps, Instructi
                                     </p>
                                     <hr />
                                 <h2>How to gif below</h2>
-                                    <img style={{maxWidth: '100%'}} src={process.env.PUBLIC_URL + '/video-loop-tool-how-to-gif.gif'} />
+                                    <img alt="How To Gif" style={{maxWidth: '100%'}} src={process.env.PUBLIC_URL + '/video-loop-tool-how-to-gif.gif'} />
                                 </div>
                             </div>
                         </div>

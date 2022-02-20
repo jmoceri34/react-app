@@ -102,7 +102,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
                 // if we're on a playlist
                 if (selectedPlaylist !== undefined && selectedVideoId !== undefined) {
-                    let video = this.playlists[selectedPlaylist!].Videos.filter(v => v.Id == selectedVideoId)[0];
+                    let video = this.playlists[selectedPlaylist!].Videos.filter(v => v.Id === selectedVideoId)[0];
 
                     if (video !== undefined) {
                         this.selectVideo(video);
@@ -122,7 +122,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
         // on a playlist with a video
         if (this.state.selectedPlaylist !== undefined && this.state.selectedVideoId !== undefined) {
-            let video = this.playlists[this.state.selectedPlaylist].Videos.filter(v => v.Id == this.state.selectedVideoId)[0];
+            let video = this.playlists[this.state.selectedPlaylist].Videos.filter(v => v.Id === this.state.selectedVideoId)[0];
 
             //check for video delays
             if (video.Delay > 0) {
@@ -237,7 +237,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
     playerOnStateChange(event: any): void {
 
         // if the video is playing
-        if (event.data == (window as any).YT.PlayerState.PLAYING) {
+        if (event.data === (window as any).YT.PlayerState.PLAYING) {
 
             // if the current time is less than the start time, seek to the start time
             if (this.player && this.player.getCurrentTime() < this.startTimeValue) {
@@ -270,8 +270,8 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                     let nextVideo: Video | undefined = undefined;
 
                     for (let i = 0; i < videos.length; i++) {
-                        if (videos[i].Id == this.state.selectedVideoId) {
-                            if (i == videos.length - 1) {
+                        if (videos[i].Id === this.state.selectedVideoId) {
+                            if (i === videos.length - 1) {
                                 nextVideo = videos[0];
                             }
                             else {
@@ -301,12 +301,12 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                 }
             }, 1000);
         }
-        else if (event.data == (window as any).YT.PlayerState.PAUSED) {
+        else if (event.data === (window as any).YT.PlayerState.PAUSED) {
             if (this.loopTimeout) {
                 clearTimeout(this.loopTimeout);
             }
         }
-        else if (event.data == (window as any).YT.PlayerState.ENDED) {
+        else if (event.data === (window as any).YT.PlayerState.ENDED) {
             if (this.loopTimeout) {
                 clearTimeout(this.loopTimeout);
             }
@@ -487,7 +487,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                         <h6 style={{flex: '0 0 100%'}}>Currently playing</h6>
                                     )
                                 }
-                                <img src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", paddingBottom: '12px' }} />
+                                <img alt={video.Name} src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", paddingBottom: '12px' }} />
 
                                 <div style={{ alignSelf: 'center' }} key={video.Id}>
                                     <Button variant="contained" color="primary" onClick={(e) => { this.selectVideo(video) }} style={{ "marginRight": "12px" }}>
