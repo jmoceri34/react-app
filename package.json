@@ -48,7 +48,6 @@
     "html-webpack-plugin": "4.5.0",
     "identity-obj-proxy": "3.0.0",
     "jest": "26.6.0",
-    "jest-circus": "26.6.0",
     "jest-resolve": "26.6.0",
     "jest-watch-typeahead": "0.6.1",
     "jquery": "^3.6.0",
@@ -111,6 +110,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/youtube": "^0.0.46",
     "gh-pages": "^3.1.0",
+    "jest-circus": "^27.5.1",
     "typings-for-css-modules-loader": "^1.7.0"
   },
   "eslintConfig": {
@@ -140,7 +140,7 @@
       "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}"
     ],
     "testEnvironment": "jsdom",
-    "testRunner": "C:\\Users\\jmoce\\source\\repos\\video-loop-tool\\node_modules\\jest-circus\\runner.js",
+    "testRunner": "<rootDir>/node_modules/jest-circus/runner.js",
     "transform": {
       "^.+\\.(js|jsx|mjs|cjs|ts|tsx)$": "<rootDir>/config/jest/babelTransform.js",
       "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
@@ -151,7 +151,7 @@
       "^.+\\.module\\.(css|sass|scss)$"
     ],
     "modulePaths": [
-      "C:\\Users\\jmoce\\source\\repos\\video-loop-tool\\src"
+      "<rootDir>/src"
     ],
     "moduleNameMapper": {
       "^react-native$": "react-native-web",
