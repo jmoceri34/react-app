@@ -201,7 +201,6 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
         });
     }
 
-
     reorder(list: any[], startIndex: number, endIndex: number) {
         const result = Array.from(list);
         const [removed] = result.splice(startIndex, 1);
