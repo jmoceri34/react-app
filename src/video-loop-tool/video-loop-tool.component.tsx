@@ -33,10 +33,15 @@ const VideoSlider = styled(Slider)(({ theme }) => ({
     },
 }));
 
+/**
+ * Use this component to loop parts of YouTube videos
+ * */
 export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLoopToolState> {
 
+    /** The state of the component */
     state: VideoLoopToolState;
 
+    /** to allow time between changing videos */
     changingVideo: boolean;
     player: YT.Player | undefined;
     startTimeHandle: JQuery<any> | undefined;
