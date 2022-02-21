@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/video-loop-tool/static/css/main.c0a5da32.chunk.css",
+    "main.js": "/video-loop-tool/build/main.dd1ba5b8.js",
+    "runtime-main.js": "/video-loop-tool/build/bundle.3527ec54.js",
+    "build/2.a463b79e.js": "/video-loop-tool/build/2.a463b79e.js",
+    "build/2.a463b79e.js.LICENSE.txt": "/video-loop-tool/build/2.a463b79e.js.LICENSE.txt",
+    "index.html": "/video-loop-tool/index.html",
+    "static/css/main.c0a5da32.chunk.css.map": "/video-loop-tool/static/css/main.c0a5da32.chunk.css.map"
+  },
+  "entrypoints": [
+    "build/bundle.3527ec54.js",
+    "build/2.a463b79e.js",
+    "static/css/main.c0a5da32.chunk.css",
+    "build/main.dd1ba5b8.js"
+  ]
+}
