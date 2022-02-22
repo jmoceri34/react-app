@@ -1,5 +1,7 @@
+import { Button } from '@mui/material';
 import { mount, shallow } from 'enzyme';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
+import VideoLoopTool from '../video-loop-tool/video-loop-tool.component';
 import { Playlist } from './playlist.model';
 import Playlists from './playlists.component';
 
@@ -212,4 +214,33 @@ test('onbeforeunload is called and cleared when the component is mounted / unmou
     result.unmount();
 
     expect(window.onbeforeunload).toBeNull();
+});
+
+test('prompt message callback is called', () => {
+    const result = mount((
+        <BrowserRouter basename="/video-loop-tool">
+            <Link id="video-loop-tool-button" to="/" style={{ textDecoration: 'none' }}>
+                <Button variant="contained" color="primary" style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
+                    Video Loop Tool
+                </Button>
+            </Link>
+            <Switch>
+                <Route exact path="/" component={VideoLoopTool}>
+                </Route>
+                <Route exact path="/playlists" component={Playlists}>
+                </Route>
+            </Switch>
+            <Playlists />
+        </BrowserRouter>
+    ));
+
+    let instance = result.find(Playlists).instance() as Playlists;
+
+    let spy = jest.spyOn(instance, "promptMessageCallback");
+
+    result.find('#video-loop-tool-button').hostNodes().simulate('click');
+
+    setTimeout(() => {
+        expect(spy).toHaveBeenCalledTimes(1);
+    });
 });
