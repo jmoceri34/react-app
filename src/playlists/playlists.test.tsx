@@ -201,19 +201,13 @@ test('onbeforeunload is called and cleared when the component is mounted / unmou
 
     let instance = result.find(Playlists).instance() as Playlists;
 
-    instance.saveChanges();
+    let spy = jest.spyOn(instance, "onBeforeUnloadCallback");
 
     instance.removePlaylist(1);
 
-    let ps = JSON.parse(localStorage.getItem("Playlists")!);
-
-    expect(ps).toHaveLength(1);
-
     window.dispatchEvent(new Event("beforeunload"));
 
-    ps = JSON.parse(localStorage.getItem("Playlists")!);
-
-    expect(ps).toHaveLength(0);
+    expect(spy).toHaveBeenCalledTimes(1);
 
     result.unmount();
 

@@ -44,13 +44,13 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
     }
 
     componentDidMount() {
-        window.onbeforeunload = () => {
+        window.onbeforeunload = () => { return this.onBeforeUnloadCallback(); };
+    }
 
-            // save on page refresh
-            this.saveChanges();
+    onBeforeUnloadCallback(): string {
+        this.saveChanges();
 
-            return '';
-        };
+        return '';
     }
 
     componentWillUnmount() {
