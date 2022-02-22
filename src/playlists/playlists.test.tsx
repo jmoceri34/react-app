@@ -143,7 +143,7 @@ test('Adding and removing videos from a playlist should increase and decrease th
     expect(nextVideo.StartTime).toEqual(0);
     expect(video.EndTime).toEqual(0);
 
-    instance.removeVideo(1, 1);
+    result.find('#remove-video-1-button').hostNodes().simulate('click');
 
     video = playlist.Videos[0];
 
