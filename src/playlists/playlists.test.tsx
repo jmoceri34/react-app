@@ -1,5 +1,6 @@
 import { mount, shallow } from 'enzyme';
 import { BrowserRouter } from 'react-router-dom';
+import { Playlist } from './playlist.model';
 import Playlists from './playlists.component';
 
 beforeEach(() => {
@@ -153,4 +154,68 @@ test('Adding and removing videos from a playlist should increase and decrease th
     expect(video.VideoId).toEqual('');
     expect(video.StartTime).toEqual(0);
     expect(video.EndTime).toEqual(0);
+});
+
+test('nameof should return the name of the property', () => {
+    const result = mount((
+        <BrowserRouter basename="/video-loop-tool">
+            <Playlists />
+        </BrowserRouter>
+    ));
+
+    let instance = result.find(Playlists).instance() as Playlists;
+
+    expect(instance.nameof(instance.state.playlists[0], (p: Playlist) => p.Name)).toEqual("Name");
+});
+
+test('updating a playlist input fields should update the playlist object', () => {
+    const result = mount((
+        <BrowserRouter basename="/video-loop-tool">
+            <Playlists />
+        </BrowserRouter>
+    ));
+
+    let instance = result.find(Playlists).instance() as Playlists;
+
+    result.find('#playlist-name-text-field').hostNodes().props().onChange!({ target: { value: 'Hello Playlist' } });
+    result.find('#video-1-name-text-field').hostNodes().props().onChange!({ target: { value: 'Hello Video' } });
+    result.find('#video-1-video-id-text-field').hostNodes().props().onChange!({ target: { value: 'Hello Video Id' } });
+    result.find('#video-1-start-time-text-field').hostNodes().props().onChange!({ target: { value: '0' } });
+    result.find('#video-1-end-time-text-field').hostNodes().props().onChange!({ target: { value: '0' } });
+    result.find('#video-1-delay-text-field').hostNodes().props().onChange!({ target: { value: '0' } });
+
+    expect(instance.state.playlists[0].Name).toEqual('Hello Playlist');
+    expect(instance.state.playlists[0].Videos[0].Name).toEqual('Hello Video');
+    expect(instance.state.playlists[0].Videos[0].VideoId).toEqual('Hello Video Id');
+    expect(instance.state.playlists[0].Videos[0].StartTime).toEqual('0');
+    expect(instance.state.playlists[0].Videos[0].EndTime).toEqual('0');
+    expect(instance.state.playlists[0].Videos[0].Delay).toEqual('0');
+});
+
+test('onbeforeunload is called and cleared when the component is mounted / unmounted', () => {
+    const result = mount((
+        <BrowserRouter basename="/video-loop-tool">
+            <Playlists />
+        </BrowserRouter>
+    ));
+
+    let instance = result.find(Playlists).instance() as Playlists;
+
+    instance.saveChanges();
+
+    instance.removePlaylist(1);
+
+    let ps = JSON.parse(localStorage.getItem("Playlists")!);
+
+    expect(ps).toHaveLength(1);
+
+    window.dispatchEvent(new Event("beforeunload"));
+
+    ps = JSON.parse(localStorage.getItem("Playlists")!);
+
+    expect(ps).toHaveLength(0);
+
+    result.unmount();
+
+    expect(window.onbeforeunload).toBeNull();
 });
