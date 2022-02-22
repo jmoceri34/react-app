@@ -5,7 +5,7 @@ import Playlists from './playlists.component';
 test('renders playlists', () => {
     const result = shallow((
         <BrowserRouter basename="/video-loop-tool">
-            < Playlists />
+            <Playlists />
         </BrowserRouter>
     ));
 
