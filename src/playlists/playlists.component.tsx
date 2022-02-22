@@ -86,7 +86,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
 
         this.setState({
             playlists: newPlaylists,
-            selectedPlaylist: removeState ? undefined : this.state.selectedPlaylist
+            selectedPlaylist: removeState ? undefined : (this.state.selectedPlaylist! > newPlaylists.length - 1 ? newPlaylists.length - 1 : this.state.selectedPlaylist)
         });
     }
 
@@ -200,7 +200,6 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
             playlists: playlists
         });
     }
-
 
     reorder(list: any[], startIndex: number, endIndex: number) {
         const result = Array.from(list);

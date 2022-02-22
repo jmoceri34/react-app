@@ -20,7 +20,7 @@ function App() {
                     {/* Nav bar */}
                     <Card style={{margin: '12px', padding: '0 !important'}}>
                         <CardContent style={{ 'padding': '0 !important' }}>
-                            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                            <div id="link-container" style={{ display: 'flex', flexWrap: 'wrap' }}>
                                 <Link to="/" style={{ textDecoration: 'none' }}>
                                     <Button variant="contained" color="primary" style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
                                         Video Loop Tool
@@ -36,11 +36,11 @@ function App() {
                                         Instructions
                                     </Button>
                                 </Link>
-                                <Link to={{ pathname: 'https://github.com/joemoceri/video-loop-tool'}} target="_blank" style={{ textDecoration: 'none' }}>
+                                <a href='https://github.com/joemoceri/video-loop-tool' target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
                                     <Button variant="contained" color="primary" style={{ 'marginTop': '12px', 'marginRight': '12px' }}>
                                         View on GitHub
                                     </Button>
-                                </Link>
+                                </a>
                             </div>
                         </CardContent>
                     </Card>
