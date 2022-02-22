@@ -8,3 +8,9 @@ test('renders instructions', () => {
 
     expect(instance).toBeInstanceOf(Instructions);
 });
+
+test('instructions how to gif has the right src', () => {
+    const result = shallow(<Instructions />);
+
+    expect(result.find('#how-to-gif').prop('src')).toEqual(process.env.PUBLIC_URL + '/video-loop-tool-how-to-gif.gif');
+});
