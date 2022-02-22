@@ -3,7 +3,7 @@ import { Playlist } from "./playlist.model";
 import { Prompt } from "react-router";
 import * as H from 'history';
 import { Video } from "./video.model";
-import { Button, Card, CardContent, MenuItem, Paper, Select, TextField } from "@mui/material";
+import { Button, Card, CardContent, MenuItem, Paper, Select, SelectChangeEvent, TextField } from "@mui/material";
 import { DragDropContext, Draggable, DragStart, DragUpdate, Droppable, DropResult, ResponderProvided } from "react-beautiful-dnd";
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 
@@ -222,10 +222,10 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                         <div>
                             <div style={{ marginBottom: '12px' }}>
                                 <TextField id="standard-basic" label="Playlist Name" defaultValue={playlist?.Name} onChange={e => this.handlePlaylistChange(e, playlistIndex, this.nameof(playlist, (p: Playlist) => p.Name))} style={{ width: "400px", "marginRight": "12px" }} />
-                                <Button variant="contained" color="primary" onClick={() => { this.addVideo(playlist.Id) }} style={{ 'marginTop': "12px", "marginRight": '12px' }}>
+                                <Button id="add-video-button" variant="contained" color="primary" onClick={() => { this.addVideo(playlist.Id) }} style={{ 'marginTop': "12px", "marginRight": '12px' }}>
                                     Add Video
                                 </Button>
-                                <Button variant="contained" color="secondary" onClick={() => { this.removePlaylist(playlist.Id) }} style={{ 'marginTop': "12px" }}>
+                                <Button className="remove-playlist-button" id={"remove-playlist-" + playlist.Id + "-button"} variant="contained" color="secondary" onClick={() => { this.removePlaylist(playlist.Id) }} style={{ 'marginTop': "12px" }}>
                                     Remove Playlist
                                 </Button>
                             </div>
@@ -302,10 +302,11 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                         </div>
                         <Select
                             label="Playlists"
+                            id="playlist-dropdown"
                             displayEmpty
                             renderValue={this.state.selectedPlaylist !== undefined ? () => this.state.playlists[this.state.selectedPlaylist!].Name : () => 'Playlists'}
                             defaultValue="Playlists"
-                            onChange={e => this.handlePlaylistDropdownChange(e)}
+                            onChange={(e: SelectChangeEvent) => this.handlePlaylistDropdownChange(e)}
                             style={{ marginRight: '24px', 'minWidth': '200px', marginBottom: '12px' }}>
                             {
                                 this.state.playlists.map((playlist, playlistIndex) => {
@@ -315,7 +316,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                                 })
                             }
                         </Select>
-                        <Button variant="contained" color="primary" onClick={() => { this.addPlaylist() }} style={{ marginRight: '12px' }}>
+                        <Button id="add-new-playlist-button" variant="contained" color="primary" onClick={() => { this.addPlaylist() }} style={{ marginRight: '12px' }}>
                             Add New Playlist
                         </Button>
                         <Button variant="contained" color="primary" onClick={() => { this.saveChanges() }} style={{ marginRight: '12px' }}>
