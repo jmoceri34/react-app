@@ -36,7 +36,7 @@ function App() {
                                         Instructions
                                     </Button>
                                 </Link>
-                                <a href='https://github.com/joemoceri/video-loop-tool' target="_blank" style={{ textDecoration: 'none' }}>
+                                <a href='https://github.com/joemoceri/video-loop-tool' target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
                                     <Button variant="contained" color="primary" style={{ 'marginTop': '12px', 'marginRight': '12px' }}>
                                         View on GitHub
                                     </Button>
