@@ -1,7 +1,7 @@
 import { Button } from '@mui/material';
 import { mount, shallow } from 'enzyme';
 import { render } from '@testing-library/react'
-import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Link, Prompt, Route, Switch } from 'react-router-dom';
 import VideoLoopTool from '../video-loop-tool/video-loop-tool.component';
 import { Playlist } from './playlist.model';
 import Playlists from './playlists.component';
@@ -247,16 +247,20 @@ test('prompt message callback is called', () => {
 
     result.find('#video-loop-tool-button').hostNodes().simulate('click');
 
-    setTimeout(() => {
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(saveChangesSpy).toHaveBeenCalledTimes(1);
-        expect(instance.state.playlists[1].Id).toEqual(2);
-
-    }, 1000);
-
     let r = instance.promptMessageCallback({ pathname: '', search: '', state: '', hash: '' }, "PUSH");
 
     expect(r).toEqual(true);
+    expect(spy).toBeCalledTimes(1);
+    expect(saveChangesSpy).toBeCalledTimes(1);
+
+    let f = result.find(Prompt).prop('message') as Function;
+
+    r = f();
+    expect(spy).toBeCalledTimes(2);
+    expect(saveChangesSpy).toBeCalledTimes(2);
+
+    expect(r).toEqual(true);
+
 });
 
 test('drag and drop should resort the playlists', () => {
