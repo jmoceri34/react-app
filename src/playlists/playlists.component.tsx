@@ -309,7 +309,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                         <Button id="add-new-playlist-button" variant="contained" color="primary" onClick={() => { this.addPlaylist() }} style={{ marginRight: '12px' }}>
                             Add New Playlist
                         </Button>
-                        <Button variant="contained" color="primary" onClick={() => { this.saveChanges() }} style={{ marginRight: '12px' }}>
+                        <Button id="save-changes-button" variant="contained" color="primary" onClick={() => { this.saveChanges() }} style={{ marginRight: '12px' }}>
                             Save Changes
                         </Button>
                     </CardContent>

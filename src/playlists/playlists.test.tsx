@@ -282,3 +282,22 @@ test('drag and drop should resort the playlists', () => {
     expect(second.id).toEqual('drag-handle-video-1');
 
 });
+
+test('save changes button should save the playlist', () => {
+    const result = mount((
+        <BrowserRouter basename="/video-loop-tool">
+            <Playlists />
+        </BrowserRouter>
+    ));
+
+    let instance = result.find(Playlists).instance() as Playlists;
+    let spy = jest.spyOn(instance, "saveChanges");
+
+    instance.addPlaylist();
+
+    expect(spy).toHaveBeenCalledTimes(0);
+
+    result.find('#save-changes-button').hostNodes().simulate('click');
+
+    expect(spy).toHaveBeenCalledTimes(1);
+});
