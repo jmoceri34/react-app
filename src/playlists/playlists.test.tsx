@@ -241,15 +241,22 @@ test('prompt message callback is called', () => {
     let instance = result.find(Playlists).instance() as Playlists;
 
     let spy = jest.spyOn(instance, "promptMessageCallback");
+    let saveChangesSpy = jest.spyOn(instance, "saveChanges");
+
+    instance.addPlaylist();
 
     result.find('#video-loop-tool-button').hostNodes().simulate('click');
 
     setTimeout(() => {
         expect(spy).toHaveBeenCalledTimes(1);
-        let r = instance.promptMessageCallback({ pathname: '', search: '', state: '', hash: '' }, "PUSH");
-        expect(spy).toHaveBeenCalledTimes(2);
-        expect(r).toBeTruthy();
+        expect(saveChangesSpy).toHaveBeenCalledTimes(1);
+        expect(instance.state.playlists[1].Id).toEqual(2);
+
     }, 1000);
+
+    let r = instance.promptMessageCallback({ pathname: '', search: '', state: '', hash: '' }, "PUSH");
+
+    expect(r).toEqual(true);
 });
 
 test('drag and drop should resort the playlists', () => {
