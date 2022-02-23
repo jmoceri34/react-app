@@ -4,7 +4,7 @@ import { Prompt } from "react-router";
 import * as H from 'history';
 import { Video } from "./video.model";
 import { Button, Card, CardContent, MenuItem, Paper, Select, SelectChangeEvent, TextField } from "@mui/material";
-import { DragDropContext, Draggable, DragStart, DragUpdate, Droppable, DropResult, ResponderProvided } from "react-beautiful-dnd";
+import { DragDropContext, Draggable, Droppable, DropResult, ResponderProvided } from "react-beautiful-dnd";
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 
 export interface PlaylistProps {
@@ -44,13 +44,13 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
     }
 
     componentDidMount() {
-        window.onbeforeunload = () => {
+        window.onbeforeunload = () => { return this.onBeforeUnloadCallback(); };
+    }
 
-            // save on page refresh
-            this.saveChanges();
+    onBeforeUnloadCallback(): string {
+        this.saveChanges();
 
-            return '';
-        };
+        return '';
     }
 
     componentWillUnmount() {
@@ -172,14 +172,6 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
         return result;
     }
 
-    onDragStart(initial: DragStart, provided: ResponderProvided): void {
-
-    }
-
-    onDragUpdate(initial: DragUpdate, provided: ResponderProvided): void {
-
-    }
-
     onDragEnd(result: DropResult, provided: ResponderProvided): void {
         let playlists = [...this.state.playlists];
 
@@ -221,7 +213,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                     <CardContent style={{ padding: '0 !important' }}>
                         <div>
                             <div style={{ marginBottom: '12px' }}>
-                                <TextField id="standard-basic" label="Playlist Name" defaultValue={playlist?.Name} onChange={e => this.handlePlaylistChange(e, playlistIndex, this.nameof(playlist, (p: Playlist) => p.Name))} style={{ width: "400px", "marginRight": "12px" }} />
+                                <TextField id="playlist-name-text-field" label="Playlist Name" defaultValue={playlist?.Name} onChange={e => this.handlePlaylistChange(e, playlistIndex, this.nameof(playlist, (p: Playlist) => p.Name))} style={{ width: "400px", "marginRight": "12px" }} />
                                 <Button id="add-video-button" variant="contained" color="primary" onClick={() => { this.addVideo(playlist.Id) }} style={{ 'marginTop': "12px", "marginRight": '12px' }}>
                                     Add Video
                                 </Button>
@@ -230,10 +222,8 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                                 </Button>
                             </div>
                             <DragDropContext
-                                onDragStart={(initial: DragStart, provided: ResponderProvided) => this.onDragStart(initial, provided)}
-                                onDragUpdate={(initial: DragUpdate, provided: ResponderProvided) => this.onDragUpdate(initial, provided)}
                                 onDragEnd={(result: DropResult, provided: ResponderProvided) => this.onDragEnd(result, provided)}>
-                                <Droppable droppableId="droppable">
+                                <Droppable droppableId="droppable" direction="vertical">
                                     {(provided, snapshot) => (
                                         <div {...provided.droppableProps} ref={provided.innerRef}>
                                             {
@@ -251,15 +241,15 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                                                                             <Card variant="outlined" style={{ "padding": "12px", background: snapshot.isDragging ? 'lightgreen' : '#fff' }} key={video.Id}>
                                                                                 <CardContent>
                                                                                     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                                                                                        <Paper style={{ width: '24px', display: 'inline-block', height: '45px', marginRight: '12px' }} {...provided.dragHandleProps}>
+                                                                                        <Paper data-testid="video-item" id={"drag-handle-video-" + video.Id} style={{ width: '24px', display: 'inline-block', height: '45px', marginRight: '12px' }} {...provided.dragHandleProps}>
                                                                                             <DragHandleIcon color="primary" style={{ height: '45px', maxHeight: '45px' }} />
                                                                                         </Paper>
                                                                                         <img alt={video.Name} src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", marginBottom: '12px' }} />
-                                                                                        <TextField id="standard-basic" label="Video Name" defaultValue={video.Name} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.Name))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
-                                                                                        <TextField id="standard-basic" label="Video VideoId" defaultValue={video.VideoId} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.VideoId))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
-                                                                                        <TextField type="number" inputProps={{ min: 0, inputMode: 'numeric', pattern: '[0-9]*' }} id="standard-basic" label="Video StartTime" defaultValue={video.StartTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.StartTime))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
-                                                                                        <TextField type="number" inputProps={{ min: 0, inputMode: 'numeric', pattern: '[0-9]*' }} id="standard-basic" label="Video EndTime" defaultValue={video.EndTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.EndTime))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
-                                                                                        <TextField type="number" inputProps={{ min: 0, inputMode: 'numeric', pattern: '[0-9]*' }} id="standard-basic" label="Video Delay" defaultValue={video.Delay} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.Delay))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                                                        <TextField id={"video-" + video.Id + "-name-text-field"} label="Video Name" defaultValue={video.Name} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.Name))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                                                        <TextField id={"video-" + video.Id + "-video-id-text-field"} label="Video VideoId" defaultValue={video.VideoId} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.VideoId))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                                                        <TextField id={"video-" + video.Id + "-start-time-text-field"} type="number" inputProps={{ min: 0, inputMode: 'numeric', pattern: '[0-9]*' }} label="Video StartTime" defaultValue={video.StartTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.StartTime))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                                                        <TextField id={"video-" + video.Id + "-end-time-text-field"} type="number" inputProps={{ min: 0, inputMode: 'numeric', pattern: '[0-9]*' }} label="Video EndTime" defaultValue={video.EndTime} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.EndTime))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
+                                                                                        <TextField id={"video-" + video.Id + "-delay-text-field"} type="number" inputProps={{ min: 0, inputMode: 'numeric', pattern: '[0-9]*' }} label="Video Delay" defaultValue={video.Delay} onChange={e => this.handleVideoChange(e, playlistIndex, videoIndex, this.nameof(video, (v: Video) => v.Delay))} style={{ "width": "200px", "marginRight": "12px", marginBottom: '12px' }} />
                                                                                         <div style={{ alignSelf: 'center' }}>
                                                                                             <Button id={"remove-video-" + video.Id + "-button"} variant="contained" color="secondary" onClick={() => { this.removeVideo(playlist.Id, video.Id) }}>
                                                                                                 Remove Video
@@ -319,7 +309,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                         <Button id="add-new-playlist-button" variant="contained" color="primary" onClick={() => { this.addPlaylist() }} style={{ marginRight: '12px' }}>
                             Add New Playlist
                         </Button>
-                        <Button variant="contained" color="primary" onClick={() => { this.saveChanges() }} style={{ marginRight: '12px' }}>
+                        <Button id="save-changes-button" variant="contained" color="primary" onClick={() => { this.saveChanges() }} style={{ marginRight: '12px' }}>
                             Save Changes
                         </Button>
                     </CardContent>
