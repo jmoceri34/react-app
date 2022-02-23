@@ -172,14 +172,6 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
         return result;
     }
 
-    onDragStart(initial: DragStart, provided: ResponderProvided): void {
-
-    }
-
-    onDragUpdate(initial: DragUpdate, provided: ResponderProvided): void {
-
-    }
-
     onDragEnd(result: DropResult, provided: ResponderProvided): void {
         let playlists = [...this.state.playlists];
 
@@ -230,10 +222,8 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                                 </Button>
                             </div>
                             <DragDropContext
-                                onDragStart={(initial: DragStart, provided: ResponderProvided) => this.onDragStart(initial, provided)}
-                                onDragUpdate={(initial: DragUpdate, provided: ResponderProvided) => this.onDragUpdate(initial, provided)}
                                 onDragEnd={(result: DropResult, provided: ResponderProvided) => this.onDragEnd(result, provided)}>
-                                <Droppable droppableId="droppable">
+                                <Droppable droppableId="droppable" direction="vertical">
                                     {(provided, snapshot) => (
                                         <div {...provided.droppableProps} ref={provided.innerRef}>
                                             {
@@ -251,7 +241,7 @@ class Playlists extends Component<PlaylistProps, PlaylistState> {
                                                                             <Card variant="outlined" style={{ "padding": "12px", background: snapshot.isDragging ? 'lightgreen' : '#fff' }} key={video.Id}>
                                                                                 <CardContent>
                                                                                     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                                                                                        <Paper style={{ width: '24px', display: 'inline-block', height: '45px', marginRight: '12px' }} {...provided.dragHandleProps}>
+                                                                                        <Paper data-testid="video-item" id={"drag-handle-video-" + video.Id} style={{ width: '24px', display: 'inline-block', height: '45px', marginRight: '12px' }} {...provided.dragHandleProps}>
                                                                                             <DragHandleIcon color="primary" style={{ height: '45px', maxHeight: '45px' }} />
                                                                                         </Paper>
                                                                                         <img alt={video.Name} src={"https://img.youtube.com/vi/" + video.VideoId + "/hqdefault.jpg"} style={{ width: '80x', height: '45px', "marginRight": "12px", marginBottom: '12px' }} />

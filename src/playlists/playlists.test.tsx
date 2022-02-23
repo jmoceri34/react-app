@@ -1,9 +1,13 @@
 import { Button } from '@mui/material';
 import { mount, shallow } from 'enzyme';
+import { render } from '@testing-library/react'
 import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
 import VideoLoopTool from '../video-loop-tool/video-loop-tool.component';
 import { Playlist } from './playlist.model';
 import Playlists from './playlists.component';
+import { verticalDrag } from 'react-beautiful-dnd-tester';
+
+jest.useFakeTimers();
 
 beforeEach(() => {
     localStorage.setItem("Playlists", "[]");
@@ -242,5 +246,32 @@ test('prompt message callback is called', () => {
 
     setTimeout(() => {
         expect(spy).toHaveBeenCalledTimes(1);
-    });
+        let r = instance.promptMessageCallback({ pathname: '', search: '', state: '', hash: '' }, "PUSH");
+        expect(spy).toHaveBeenCalledTimes(2);
+        expect(r).toBeTruthy();
+    }, 1000);
+});
+
+test('drag and drop should resort the playlists', () => {
+    const result = render((
+        <BrowserRouter basename="/video-loop-tool">
+            <Playlists />
+        </BrowserRouter>
+    ));
+
+
+    let first = result.getAllByTestId(/video-item/i)[0] as HTMLElement;
+    let second = result.getAllByTestId(/video-item/i)[1] as HTMLElement;
+
+    expect(first.id).toEqual('drag-handle-video-1');
+    expect(second.id).toEqual('drag-handle-video-2');
+
+    verticalDrag(second).inFrontOf(first);
+
+    first = result.getAllByTestId(/video-item/i)[0] as HTMLElement;
+    second = result.getAllByTestId(/video-item/i)[1] as HTMLElement;
+
+    expect(first.id).toEqual('drag-handle-video-2');
+    expect(second.id).toEqual('drag-handle-video-1');
+
 });
