@@ -13,6 +13,8 @@ export interface VideoLoopToolProps {
 
 export interface VideoLoopToolState {
     videoId: string;
+    videoDelay: number;
+    currentVideoDelay: number;
     selectedPlaylist: number | undefined;
     selectedVideoId: number | undefined;
     sliderValues: number[];
@@ -52,6 +54,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
     sliderMaxValue: number;
 
     loopTimeout: NodeJS.Timer | undefined;
+    delayTimer: NodeJS.Timer | undefined;
 
     urlParameters: URLSearchParams;
     queryStartTime: string | null;
@@ -80,8 +83,10 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
         this.state = {
             videoId: this.urlParameters.get("v")!,
+            videoDelay: this.urlParameters.get("d") !== null ? parseInt(this.urlParameters.get("d")!) : 0,
+            currentVideoDelay: 0,
             selectedPlaylist: selectedPlaylist,
-            selectedVideoId: undefined,
+            selectedVideoId: selectedVideoId,
             sliderValues: [0, 0],
             playThroughPlaylist: false,
         }
@@ -99,55 +104,66 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
         if (!isNumeric(this.queryEndTime)) {
             this.queryEndTime = '0';
         }
+    }
 
+    componentDidMount() {
         // starting with a video id
         if (this.state.videoId) {
             // give it a second
             setTimeout(() => {
 
                 // if we're on a playlist
-                if (selectedPlaylist !== undefined && selectedVideoId !== undefined) {
-                    let video = this.playlists[selectedPlaylist!].Videos.filter(v => v.Id === selectedVideoId)[0];
+                if (this.state.selectedPlaylist !== undefined && this.state.selectedVideoId !== undefined) {
+                    let video = this.playlists[this.state.selectedPlaylist!].Videos.filter(v => v.Id === this.state.selectedVideoId)[0];
 
                     if (video !== undefined) {
                         this.selectVideo(video);
                     }
                     else {
-                        this.startLoop();
+                        this.startVideo();
                     }
                 }
                 else {
-                    this.startLoop();
+                    this.startVideo();
                 }
             }, 1000);
         }
     }
 
-    startLoop(): void {
+    startDelayTimer(callback: any): void {
 
-        // on a playlist with a video
-        if (this.state.selectedPlaylist !== undefined && this.state.selectedVideoId !== undefined) {
-            let video = this.playlists[this.state.selectedPlaylist].Videos.filter(v => v.Id === this.state.selectedVideoId)[0];
-
-            //check for video delays
-            if (video.Delay > 0) {
-
-                // stop the player with the delay if it exists, otherwise just wait
-                if (this.player) {
-                    this.player.stopVideo();
-                }
-
-                setTimeout(() => {
-                    this.loopYouTubeVideo();
-                }, video.Delay * 1000);
-            }
-            else {
-                this.loopYouTubeVideo();
-            }
+        if (this.delayTimer) {
+            clearInterval(this.delayTimer!);
         }
-        else {
-            this.loopYouTubeVideo();
+
+        if (this.state.videoDelay == 0) {
+            callback();
+            return;
         }
+
+        this.state.currentVideoDelay = this.state.videoDelay;
+
+        // trigger check every 0.1 seconds
+        this.delayTimer = setInterval(() => {
+
+            let nextValue = this.state.currentVideoDelay - 0.1;
+
+            if (nextValue < 0) {
+                this.setState({
+                    currentVideoDelay: 0
+                });
+
+                clearInterval(this.delayTimer!);
+
+                callback();
+
+                return;
+            }
+
+            this.setState({
+                currentVideoDelay: nextValue
+            });
+        }, 100);
     }
 
     loopYouTubeVideo(): void {
@@ -196,8 +212,9 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                 modestbranding: 1,
                 rel: 0,
                 showinfo: 0,
-                autoplay: 0,
-                mute: 0
+                loop: 1,
+                autoplay: 1,
+                mute: 1
             },
             height: 360,
             width: '100%',
@@ -229,7 +246,9 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
             // unmute it and play at the start time
             this.player!.unMute();
 
-            this.player!.seekTo(this.startTimeValue, true);
+            setTimeout(() => {
+                this.player!.seekTo(this.startTimeValue, true);
+            });
         });
     }
 
@@ -302,7 +321,19 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                 }
                 // repeat if it's not checked
                 else {
-                    this.player!.seekTo(this.startTimeValue, true);
+
+                    if (this.state.videoDelay > 0) {
+                        this.player!.pauseVideo();
+                        this.player!.seekTo(this.startTimeValue, true);
+
+                        this.startDelayTimer(() => {
+                            this.player!.playVideo();
+                        });
+
+                    }
+                    else {
+                        this.player!.seekTo(this.startTimeValue, true);
+                    }
                 }
             }, 1000);
         }
@@ -436,11 +467,29 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
         this.setState({
             videoId: video.VideoId,
-            selectedVideoId: video.Id
+            selectedVideoId: video.Id,
+            videoDelay: video.Delay,
+            currentVideoDelay: 0,
         }, () => {
 
-            // after updating the state, start the loop
-            this.startLoop();
+            this.startVideo();
+        });
+    }
+
+    startVideo(): void {
+
+        if (this.sliderMaxValue > 0) {
+            this.player!.pauseVideo();
+        }
+
+        this.startDelayTimer(() => {
+            this.loopYouTubeVideo();
+        });
+    }
+
+    handleVideoDelayChange(e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>): void {
+        this.setState({
+            videoDelay: isNumeric(e.target.value) ? parseInt(e.target.value) : 0
         });
     }
 
@@ -499,7 +548,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                         Select
                                     </Button>
                                 </div>
-                                <p>{video.Name} ({video.StartTime}s - {video.EndTime}s)</p>
+                                <p><strong>{video.Name} ({video.StartTime}s - {video.EndTime}s)</strong>({video.Delay}s delay)</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -549,13 +598,17 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                         <div style={{ width: '100%', marginLeft: '42px', marginRight: '96px'}}>
                             <h1>Video Loop Tool</h1>
                             <div style={{ display: 'flex', marginBottom: '12px' }}>
-                                <Button variant="contained" color="primary" onClick={() => { this.startLoop() }} style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
+                                <Button variant="contained" color="primary" onClick={() => { this.startVideo(); }} style={{ 'marginTop': "12px", 'marginRight': '12px' }}>
                                     Start
                                 </Button>
                                 <TextField id="standard-basic" label="YouTube VideoID" value={this.state ? this.state.videoId || '' : ''} style={{ width: "200px" }} onChange={e => this.handleVideoIdChange(e)} />
+                                <TextField id="standard-basic" label="Video Delay" value={this.state ? this.state.videoDelay || 0 : 0} style={{ width: "200px" }} onChange={e => this.handleVideoDelayChange(e)} />
                             </div>
-                            <div className="auto-resizable-iframe" style={{display: this.player ? 'block' : 'none'}}>
-                                <div className="playerWrapper">
+                            <div style={{ display: this.state.currentVideoDelay > 0 ? 'block' : 'none', width: '640px', height: '480px', backgroundColor: '#333', lineHeight: '480px' }}>
+                                <h1 style={{ margin: '0px', textAlign: 'center', color: '#fff' }}>{this.state.currentVideoDelay.toFixed(1)}s</h1>
+                            </div>
+                            <div className="auto-resizable-iframe" style={{ display: this.player ? 'block' : 'none' }}>
+                                <div className="playerWrapper" style={{ display: (this.state.currentVideoDelay == 0) ? 'block' : 'none'}}>
                                     <div id="player"></div>
                                 </div>
                                 <div style={{ display: 'flex', marginTop: '36px', maxWidth: '100%' }}>
@@ -568,7 +621,7 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                         max={this.sliderMaxValue}
                                         className={"videoSlider"}
                                     />
-                                </div> 
+                                </div>
                             </div>
                         </div>
                     </div>
