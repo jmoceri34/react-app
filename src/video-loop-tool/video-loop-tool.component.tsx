@@ -132,6 +132,14 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
 
     startDelayTimer(callback: any): void {
 
+        // set the query video id
+        this.urlParameters.set("d", this.state.videoDelay.toString());
+        this.urlParameters.set("v", this.state.videoId);
+
+        var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + this.urlParameters.toString();
+
+        window.history.pushState({ path: newurl }, '', newurl);
+
         if (this.delayTimer) {
             clearInterval(this.delayTimer!);
         }
@@ -167,8 +175,6 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
     }
 
     loopYouTubeVideo(): void {
-        // set the query video id
-        this.urlParameters.set("v", this.state.videoId);
 
         // if the player already exists, load the video
         if (this.player) {
