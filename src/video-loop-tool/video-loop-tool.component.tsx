@@ -144,34 +144,37 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
             clearInterval(this.delayTimer!);
         }
 
-        if (this.state.videoDelay == 0) {
+        if (this.state.videoDelay === 0) {
             callback();
             return;
         }
 
-        this.state.currentVideoDelay = this.state.videoDelay;
+        this.setState({
+            currentVideoDelay: this.state.videoDelay
+        }, () => {
+            // trigger check every 0.1 seconds
+            this.delayTimer = setInterval(() => {
 
-        // trigger check every 0.1 seconds
-        this.delayTimer = setInterval(() => {
+                let nextValue = this.state.currentVideoDelay - 0.1;
 
-            let nextValue = this.state.currentVideoDelay - 0.1;
+                if (nextValue < 0) {
+                    this.setState({
+                        currentVideoDelay: 0
+                    });
 
-            if (nextValue < 0) {
+                    clearInterval(this.delayTimer!);
+
+                    callback();
+
+                    return;
+                }
+
                 this.setState({
-                    currentVideoDelay: 0
+                    currentVideoDelay: nextValue
                 });
+            }, 100);
+        });
 
-                clearInterval(this.delayTimer!);
-
-                callback();
-
-                return;
-            }
-
-            this.setState({
-                currentVideoDelay: nextValue
-            });
-        }, 100);
     }
 
     loopYouTubeVideo(): void {
@@ -562,6 +565,8 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
             });
         }
 
+        const currentVideoDelay = Number(this.state.currentVideoDelay).toFixed(1);
+
         return (
             <Card variant="outlined" style={{ margin: '12px', padding: '0 !important', 'minHeight': '950px' }}>
                 <CardContent style={{ padding: '0 !important' }}>
@@ -610,11 +615,11 @@ export default class VideoLoopTool extends Component<VideoLoopToolProps, VideoLo
                                 <TextField id="standard-basic" label="YouTube VideoID" value={this.state ? this.state.videoId || '' : ''} style={{ width: "200px" }} onChange={e => this.handleVideoIdChange(e)} />
                                 <TextField id="standard-basic" label="Video Delay" value={this.state ? this.state.videoDelay || 0 : 0} style={{ width: "200px" }} onChange={e => this.handleVideoDelayChange(e)} />
                             </div>
-                            <div style={{ display: this.state.currentVideoDelay > 0 ? 'block' : 'none', width: '640px', height: '480px', backgroundColor: '#333', lineHeight: '480px' }}>
-                                <h1 style={{ margin: '0px', textAlign: 'center', color: '#fff' }}>{this.state.currentVideoDelay.toFixed(1)}s</h1>
+                            <div style={{ display: Number(this.state.currentVideoDelay) > 0 ? 'block' : 'none', width: '640px', height: '480px', backgroundColor: '#333', lineHeight: '480px' }}>
+                                <h1 style={{ margin: '0px', textAlign: 'center', color: '#fff' }}>{currentVideoDelay}s</h1>
                             </div>
                             <div className="auto-resizable-iframe" style={{ display: this.player ? 'block' : 'none' }}>
-                                <div className="playerWrapper" style={{ display: (this.state.currentVideoDelay == 0) ? 'block' : 'none'}}>
+                                <div className="playerWrapper" style={{ display: (Number(this.state.currentVideoDelay) === 0) ? 'block' : 'none'}}>
                                     <div id="player"></div>
                                 </div>
                                 <div style={{ display: 'flex', marginTop: '36px', maxWidth: '100%' }}>
